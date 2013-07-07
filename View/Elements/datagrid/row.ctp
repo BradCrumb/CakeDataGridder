@@ -2,7 +2,7 @@
 	<?php
 	foreach ($rowData as $columnData) {
 		?>
-		<td><?php echo $columnData;?></td>
+		<td <?php echo $columnData['htmlAttributes'];?>><?php echo $columnData['text'];?></td>
 		<?php
 	}
 	?>
