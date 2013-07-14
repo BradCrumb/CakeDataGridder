@@ -4,11 +4,13 @@
  */
 class DataGridHelper extends AppHelper {
 
-	public $helpers = array('Html','Paginator');
+	public $helpers = array('Html','Paginator','ImageCropResize.Image');
 
 	private $__columns = array();
 
 	private $__actions = array();
+
+	private $__filters = array();
 
 	private $__elementsDir = 'datagrid';
 
@@ -24,16 +26,18 @@ class DataGridHelper extends AppHelper {
 			'iconClass'			=> 'icon'
 		),
 		'grid' => array(
-			'class' => 'data_grid',
-			'searchable' => true
+			'class' => 'data_grid'
 		),
 		'pagination' => array(
 			'numbers' => array()
-		)
+		),
+		'filter' => array()
 	);
 
 	public function __construct(View $View, $settings = array()) {
 		parent::__construct($View, $settings);
+
+		$this->__defaults = array_merge($this->__defaults, $settings);
 
 		$explode = explode('/',realpath(__DIR__ . DS . '..' . DS . '..'));
 		$this->__pluginName = end($explode);
@@ -51,6 +55,17 @@ class DataGridHelper extends AppHelper {
 		);
 
 		return $slug;
+	}
+
+	public function addFilter($fieldName, array $options = array()) {
+		$options = array_merge($this->__defaults['filter'], $options);
+
+		$this->__filters[$fieldName] = array(
+			'fieldName' => $fieldName,
+			'options' => $options
+		);
+
+		return $fieldName;
 	}
 
 	public function addAction($name, array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
@@ -124,6 +139,12 @@ class DataGridHelper extends AppHelper {
 		));
 	}
 
+	public function filter() {
+		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'filter', array(
+			'filters' => $this->__filters
+		));
+	}
+
 	private function __generateColumnData($data, $column) {
 		switch($column['options']['type']) {
 			case 'switcher':
@@ -132,6 +153,17 @@ class DataGridHelper extends AppHelper {
 				$icon = isset($column['options']['icon']) ? ' ' . $column['options']['iconClass'] . ' ' . $column['options']['icon'] : '';
 
 				$class = $value == 1 ? 'enabled' : 'disabled';
+
+				$trailingParams = array();
+				if (!empty($column['options']['trailingParams'])) {
+					foreach ($column['options']['trailingParams'] as $key => $param) {
+						$trailingParams[$key] = Set::extract($param, $data);
+					}
+				}
+
+				if (is_array($link)) {
+					$link += $trailingParams;
+				}
 
 				return $this->Html->link($value, $link, array('class' => 'switcher ' . $class . $icon));
 				break;
@@ -165,6 +197,21 @@ class DataGridHelper extends AppHelper {
 				));
 
 				break;
+			case 'image':
+				$value = Set::extract($column['value_path'], $data);
+
+				if (isset($column['options']['resize']) && $column['options']['resize']) {
+					$image = $this->Image->resize($value, $column['options']['resize']);
+				} else {
+					$image = $this->Html->image($value, $column['options']);
+				}
+
+				if (isset($column['url'])) {
+					$image = $this->Html->link($image, $column['url'], array('escape' => false));
+				}
+
+				return $image;
+				break;
 			case 'string':
 			default:
 				return Set::extract($column['value_path'], $data);
@@ -175,6 +222,7 @@ class DataGridHelper extends AppHelper {
 		$header = $this->header();
 		$rows = $this->rows($data);
 		$pagination = $this->pagination();
+		$filter = $this->filter();
 
 		$options = array_merge($this->__defaults['grid'], $options);
 
@@ -186,12 +234,14 @@ class DataGridHelper extends AppHelper {
 			$this->__addAjaxSort($options);
 			$this->__addAjaxPagination($options);
 			$this->__addAjaxSwitcher($options);
+			$this->__addAjaxFilter($options);
 		}
 
 		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'grid', array(
 			'header' => $header,
 			'rows' => $rows,
 			'pagination' => $pagination,
+			'filter' => $filter,
 			'options' => $this->_parseAttributes($options)
 		));
 	}
@@ -250,6 +300,26 @@ AJAXSORT
 				else {
 					switcher($(this));
 				}
+			});
+AJAXSORT
+		, array('inline' => false));
+	}
+
+	private function __addAjaxFilter(array $gridOptions) {
+		$selector = '#' . $gridOptions['id'];
+
+		$this->Html->scriptBlock(<<<AJAXSORT
+			$('body').on('submit', '{$selector} .filter_form', function(ev) {
+				ev.preventDefault();
+
+				var action = $(this).attr('action');
+				var search = $(this).find('.searchFormGrid').val();
+
+				var data = $(this).serialize();
+
+				$.post(action, data, function(html){
+					$('{$this->__defaults['update']}').html(html);
+				});
 			});
 AJAXSORT
 		, array('inline' => false));
