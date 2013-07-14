@@ -33,7 +33,7 @@ In your view you can create a simple DataGrid by doing something like this:
 
 	echo $this->DataGrid->generate($users);
 
-This code will generate a DataGrid with 3 columns for all the users we pass. The DataGrid Helper uses the Set::extract format to query the array data. So instead of "User.id" you can also use "/Users/id".
+This code will generate a DataGrid with 3 columns for all the users we pass. The DataGrid Helper uses the Set::extract format to query the array data. So instead of `User.id` you can also use `/User/id`.
 
 When you are using multiple DataGrids on one page you can reset the DataGrid settings:
 
