@@ -23,7 +23,9 @@ class DataGridHelper extends AppHelper {
 			'sort'				=> false,
 			'type'				=> 'string',
 			'htmlAttributes'	=> false,
-			'iconClass'			=> 'icon'
+			'iconClass'			=> 'icon',
+			'indentOnThread'	=> false,
+			'indentSize'		=> 2
 		),
 		'grid' => array(
 			'class' => 'data_grid'
@@ -114,23 +116,38 @@ class DataGridHelper extends AppHelper {
 		));
 	}
 
-	public function rows($dataRows) {
+	public function rows($dataRows, $returnAsArray = false, $depth = 0) {
 		$rows = array();
 		foreach ($dataRows as $row) {
-			$row = $this->row($row);
+			$renderedRow = $this->row($row, $depth);
 
-			$rows[] = $row;
+			$rows[] = $renderedRow;
+
+			$children = isset($row['children']) ? $row['children'] : null;
+
+			if (!empty($children)) {
+				$rows = array_merge($rows, $this->rows($children, true, $depth + 1));
+			}
+		}
+
+		if ($returnAsArray) {
+			return $rows;
 		}
 
 		return implode("\n", $rows);
 	}
 
-	public function row($data) {
-		$rowData = array();
+	public function row($data, $depth = 0) {
+		$rowData = array(
+			'columns' => array(),
+			'depth' => $depth
+		);
 		foreach ($this->__columns as $column) {
-			$rowData[] = array(
+			$rowData['columns'][] = array(
 				'text' => $this->__generateColumnData($data, $column),
-				'htmlAttributes' => $this->_parseAttributes($column['options']['htmlAttributes'])
+				'htmlAttributes' => $this->_parseAttributes($column['options']['htmlAttributes']),
+				'indentSize' => $column['options']['indentSize'],
+				'indentOnThread' => $column['options']['indentOnThread']
 			);
 		}
 
@@ -237,6 +254,8 @@ class DataGridHelper extends AppHelper {
 			$this->__addAjaxFilter($options);
 		}
 
+		$this->__expandRowEvents($options);
+
 		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'grid', array(
 			'header' => $header,
 			'rows' => $rows,
@@ -244,6 +263,45 @@ class DataGridHelper extends AppHelper {
 			'filter' => $filter,
 			'options' => $this->_parseAttributes($options)
 		));
+	}
+
+	private function __expandRowEvents($gridOptions) {
+		$selector = '#' . $gridOptions['id'];
+		$this->Html->scriptBlock(<<<EXPAND
+			$('{$selector} tr[data-depth]').css('cursor', 'pointer');
+
+			$('{$selector} tr[data-depth]').filter(function() {
+				return $(this).data('depth') > 0;
+			}).addClass('collapsed').hide();
+			$('body').on('click', '{$selector} tr[data-depth]', function(ev) {
+				if(ev.target.nodeName.toLowerCase() != 'a') {
+					ev.preventDefault();
+
+					var nextDepth = $(this).data('depth') + 1,
+						next = $(this).next('tr[data-depth='+nextDepth+']'),
+						hide = false;
+
+					if(next.is(':visible')) {
+						hide = true;
+					}
+					while(next.length > 0) {
+						if(!hide && next.data('depth') == nextDepth) {
+							next.show();
+							next.removeClass('collapsed').addClass('expanded');
+						}
+						else {
+							next.hide();
+							next.addClass('collapsed').removeClass('expanded');
+						}
+
+						next = next.next('tr[data-depth]').filter(function() {
+							return $(this).data('depth') >= nextDepth;
+						});
+					}
+				}
+			});
+EXPAND
+		, array('inline' => false));
 	}
 
 	private function __addAjaxSort(array $gridOptions) {
@@ -328,7 +386,9 @@ AJAXSORT
 	public function pagination(array $options = array()) {
 		$options = array_merge($this->__defaults['pagination'], $options);
 
-		return $this->Paginator->numbers($options['numbers']);
+		if ($this->Paginator->hasPage(1)) {
+			return $this->Paginator->numbers($options['numbers']);
+		}
 	}
 
 	public function reset() {
