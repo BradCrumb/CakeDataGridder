@@ -116,7 +116,7 @@ $this->DataGrid->addAction('Delete', array(
 With the Conditional column it is possible to show a value according to 1 or more conditions.
 
 ```php
-$this->DataGrid->addColumn('Active, 'User.active', array(
+$this->DataGrid->addColumn('Active', 'User.active', array(
 	'type'			=> 'conditional',
 	'conditions'	=> array('User.active' => '1'),	//Check if User.active == 1
 	'true'			=> 'Active',					//If true then print "Active"
@@ -127,7 +127,7 @@ $this->DataGrid->addColumn('Active, 'User.active', array(
 A more advanced example:
 
 ```php
-$this->DataGrid->addColumn('Active, 'User.active', array(
+$this->DataGrid->addColumn('Active', 'User.active', array(
 	'type'			=> 'conditional',
 	'conditions'	=> array('User.usergroup' => '1'),	//Check if User.usergroup == 1
 	'true'			=> array(							//If true
