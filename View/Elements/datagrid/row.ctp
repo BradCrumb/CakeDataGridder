@@ -6,6 +6,7 @@
 			<?php
 			$text = $columnData['text'];
 			if($columnData['indentOnThread']) {
+				$text = '<span>' . $text . '</span>';
 				$indent = str_repeat('&nbsp;', $columnData['indentSize']);
 				for ($i = 0;$i < $rowData['depth'];$i++) {
 					$text = $indent . $text;

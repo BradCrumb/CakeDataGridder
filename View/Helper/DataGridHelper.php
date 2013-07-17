@@ -23,9 +23,11 @@ class DataGridHelper extends AppHelper {
 			'sort'				=> false,
 			'type'				=> 'string',
 			'htmlAttributes'	=> false,
+			'header'			=> false,
 			'iconClass'			=> 'icon',
 			'indentOnThread'	=> false,
-			'indentSize'		=> 2
+			'indentSize'		=> 2,
+			'rawData'			=> false
 		),
 		'grid' => array(
 			'class' => 'data_grid'
@@ -103,8 +105,8 @@ class DataGridHelper extends AppHelper {
 		$columns = $this->__columns;
 
 		foreach ($this->__columns as $key => $column) {
-			if ($column['options']['htmlAttributes']) {
-				$columns[$key]['options']['htmlAttributes'] = $this->_parseAttributes($column['options']['htmlAttributes']);
+			if ($column['options']['header']) {
+				$columns[$key]['options']['header'] = $this->_parseAttributes($column['options']['header']);
 			}
 		}
 
@@ -163,9 +165,10 @@ class DataGridHelper extends AppHelper {
 	}
 
 	private function __generateColumnData($data, $column) {
+		$value = isset($column['options']['rawData']) && $column['options']['rawData'] ? $column['options']['rawData'] : Set::extract($column['value_path'], $data);
 		switch($column['options']['type']) {
 			case 'switcher':
-				$value = intval(Set::extract($column['value_path'], $data));
+				$value = intval($value);
 				$link = isset($column['options']['url']) ? $column['options']['url'] : '#';
 				$icon = isset($column['options']['icon']) ? ' ' . $column['options']['iconClass'] . ' ' . $column['options']['icon'] : '';
 
@@ -215,8 +218,6 @@ class DataGridHelper extends AppHelper {
 
 				break;
 			case 'image':
-				$value = Set::extract($column['value_path'], $data);
-
 				if (isset($column['options']['resize']) && $column['options']['resize']) {
 					$image = $this->Image->resize($value, $column['options']['resize']);
 				} else {
@@ -229,9 +230,48 @@ class DataGridHelper extends AppHelper {
 
 				return $image;
 				break;
+			case 'conditional':
+				$result = 'true';
+
+				foreach ($column['options']['conditions'] as $key => $value) {
+					if (Set::extract($key, $data) != $value) {
+						$result = 'false';
+						break;
+					}
+				}
+
+				if (!is_array($column['options'][$result])) {
+					return $column['options'][$result];
+				}
+
+				unset($column['options']['rawData']);
+				$column['options'] = array_merge($column['options'], $column['options'][$result]);
+
+				return $this->__generateColumnData($data, $column);
+
+				break;
+			case 'link':
+				return $this->Html->link($value, $value);
+				break;
 			case 'string':
 			default:
-				return Set::extract($column['value_path'], $data);
+				if (isset($column['options']['url'])) {
+					$trailingParams = array();
+					if (!empty($column['options']['trailingParams'])) {
+						foreach ($column['options']['trailingParams'] as $key => $param) {
+							$trailingParams[$key] = Set::extract($param, $data);
+						}
+					}
+
+					$url = $column['options']['url'];
+					if (is_array($url)) {
+						$url = $url + $trailingParams;
+					}
+
+					$value = $this->Html->link($value, $url);
+				}
+
+				return $value;
 		}
 	}
 
@@ -272,7 +312,14 @@ class DataGridHelper extends AppHelper {
 
 			$('{$selector} tr[data-depth]').filter(function() {
 				return $(this).data('depth') > 0;
-			}).addClass('collapsed').hide();
+			}).hide();
+
+			$('{$selector} tr[data-depth]').each(function() {
+				if($(this).data('depth') < $(this).next().data('depth')) {
+					$(this).addClass('expandable');
+				}
+			});
+
 			$('body').on('click', '{$selector} tr[data-depth]', function(ev) {
 				if(ev.target.nodeName.toLowerCase() != 'a') {
 					ev.preventDefault();
@@ -281,9 +328,16 @@ class DataGridHelper extends AppHelper {
 						next = $(this).next('tr[data-depth='+nextDepth+']'),
 						hide = false;
 
+					$(this).removeClass('collapsed').addClass('expanded');
 					if(next.is(':visible')) {
 						hide = true;
+						$(this).addClass('collapsed').removeClass('expanded');
 					}
+
+					if(next.length == 0) {
+						$(this).removeClass('collapsed').removeClass('expanded');
+					}
+
 					while(next.length > 0) {
 						if(!hide && next.data('depth') == nextDepth) {
 							next.show();
@@ -292,6 +346,10 @@ class DataGridHelper extends AppHelper {
 						else {
 							next.hide();
 							next.addClass('collapsed').removeClass('expanded');
+						}
+
+						if(next.next().length == 0 || next.next().data('depth') <= next.data('depth')+1) {
+							next.removeClass('collapsed').removeClass('expanded');
 						}
 
 						next = next.next('tr[data-depth]').filter(function() {
