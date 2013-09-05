@@ -170,7 +170,7 @@ class DataGridHelper extends AppHelper {
 			case 'switcher':
 				return $this->__switcherColumnData($value, $data, $column);
 			case 'actions':
-				return $this->__actionsColumnData($column);
+				return $this->__actionsColumnData($data);
 			case 'image':
 				return $this->__imageColumnData($value, $column);
 			case 'conditional':
@@ -248,7 +248,7 @@ class DataGridHelper extends AppHelper {
 			}
 			$actions[] = array(
 				'name' => $action['name'],
-				'url' => Router::url($action['url'] + $trailingParams),
+				'url' => $action['url'] + $trailingParams,
 				'options' => $action['options'],
 				'confirmMessage' => $action['confirmMessage']
 			);
