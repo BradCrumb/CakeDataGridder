@@ -30,7 +30,8 @@ class DataGridHelper extends AppHelper {
 			'rawData'			=> false
 		),
 		'grid' => array(
-			'class' => 'data_grid'
+			'class' => 'data_grid',
+			'data-update' => '#content'
 		),
 		'pagination' => array(
 			'numbers' => array()
@@ -175,7 +176,7 @@ class DataGridHelper extends AppHelper {
 	}
 
 	private function __generateColumnData($data, $column) {
-		$value = isset($column['options']['rawData']) && $column['options']['rawData'] ? $column['options']['rawData'] : Set::extract($column['value_path'], $data);
+		$value = (isset($column['options']['rawData']) && $column['options']['rawData']) ? $column['options']['rawData'] : (!empty($column['value_path']) ? Hash::get($data, $column['value_path']) : null);
 		switch($column['options']['type']) {
 			case 'switcher':
 				return $this->__switcherColumnData($value, $data, $column);
@@ -198,7 +199,7 @@ class DataGridHelper extends AppHelper {
 			$trailingParams = array();
 			if (!empty($column['options']['trailingParams'])) {
 				foreach ($column['options']['trailingParams'] as $key => $param) {
-					$trailingParams[$key] = Set::extract($param, $data);
+					$trailingParams[$key] = Hash::get($data, $param);
 				}
 			}
 
@@ -223,7 +224,7 @@ class DataGridHelper extends AppHelper {
 		$trailingParams = array();
 		if (!empty($column['options']['trailingParams'])) {
 			foreach ($column['options']['trailingParams'] as $key => $param) {
-				$trailingParams[$key] = Set::extract($param, $data);
+				$trailingParams[$key] = Hash::get($data, $param);
 			}
 		}
 
@@ -245,7 +246,7 @@ class DataGridHelper extends AppHelper {
 			$trailingParams = array();
 			if (!empty($action['trailingParams'])) {
 				foreach ($action['trailingParams'] as $key => $param) {
-					$trailingParams[$key] = Set::extract($param, $data);
+					$trailingParams[$key] = Hash::get($data, $param);
 				}
 			}
 
@@ -253,7 +254,7 @@ class DataGridHelper extends AppHelper {
 				preg_match_all('/{(.*?)}/', $action['confirmMessage'], $confirmVariables);
 
 				foreach ($confirmVariables[1] as $key => $valuePath) {
-					$action['confirmMessage'] = str_replace($confirmVariables[0][$key], Set::extract($valuePath, $data), $action['confirmMessage']);
+					$action['confirmMessage'] = str_replace($confirmVariables[0][$key], Hash::get($data, $valuePath), $action['confirmMessage']);
 				}
 			}
 			$actions[] = array(
@@ -287,7 +288,7 @@ class DataGridHelper extends AppHelper {
 		$result = 'true';
 
 		foreach ($column['options']['conditions'] as $key => $value) {
-			if (Set::extract($key, $data) != $value) {
+			if (Hash::get($data, $key) != $value) {
 				$result = 'false';
 				break;
 			}
@@ -323,6 +324,8 @@ class DataGridHelper extends AppHelper {
 		}
 
 		$this->__expandRowEvents($options);
+
+		$this->Html->script($this->__pluginName . '.DataGrid', array('inline' => false));
 
 		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'grid', array(
 			'header' => $header,
@@ -425,7 +428,7 @@ AJAXSORT;
 	}
 
 	private function __addAjaxSwitcher(array $gridOptions) {
-		$selector = '#' . $gridOptions['id'];
+		/*$selector = '#' . $gridOptions['id'];
 
 		$script = <<<AJAXSORT
 			var switcher = function(el) {
@@ -453,11 +456,11 @@ AJAXSORT;
 			});
 AJAXSORT;
 
-		$this->Html->scriptBlock($script, array('inline' => false));
+		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	private function __addAjaxFilter(array $gridOptions) {
-		$selector = '#' . $gridOptions['id'];
+		/*$selector = '#' . $gridOptions['id'];
 
 		$script = <<<AJAXSORT
 			$('body').on('submit', '{$selector} .filter_form', function(ev) {
@@ -474,7 +477,7 @@ AJAXSORT;
 			});
 AJAXSORT;
 
-		$this->Html->scriptBlock($script, array('inline' => false));
+		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	public function pagination(array $options = array()) {
