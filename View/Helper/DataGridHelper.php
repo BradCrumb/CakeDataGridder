@@ -168,115 +168,129 @@ class DataGridHelper extends AppHelper {
 		$value = isset($column['options']['rawData']) && $column['options']['rawData'] ? $column['options']['rawData'] : Set::extract($column['value_path'], $data);
 		switch($column['options']['type']) {
 			case 'switcher':
-				$value = intval($value);
-				$link = isset($column['options']['url']) ? $column['options']['url'] : '#';
-				$icon = isset($column['options']['icon']) ? ' ' . $column['options']['iconClass'] . ' ' . $column['options']['icon'] : '';
-
-				$class = $value == 1 ? 'enabled' : 'disabled';
-
-				$trailingParams = array();
-				if (!empty($column['options']['trailingParams'])) {
-					foreach ($column['options']['trailingParams'] as $key => $param) {
-						$trailingParams[$key] = Set::extract($param, $data);
-					}
-				}
-
-				if (is_array($link)) {
-					$link += $trailingParams;
-				}
-
-				$enabledLabel = isset($column['options']['label']['enabled']) ? $column['options']['label']['enabled'] : __('Enabled');
-				$disabledLabel = isset($column['options']['label']['disabled']) ? $column['options']['label']['disabled'] : __('Disabled');
-
-				$label = $value == 1 ? $enabledLabel : $disabledLabel;
-
-				return $this->Html->link($label, $link, array('class' => 'switcher ' . $class . $icon));
+				return $this->__switcherColumnData($value, $data, $column);
 			case 'actions':
-				$actions = array();
-				foreach ($this->__actions as $action) {
-					$trailingParams = array();
-					if (!empty($action['trailingParams'])) {
-						foreach ($action['trailingParams'] as $key => $param) {
-							$trailingParams[$key] = Set::extract($param, $data);
-						}
-					}
-
-					if ($action['confirmMessage']) {
-						preg_match_all('/{(.*?)}/', $action['confirmMessage'], $confirmVariables);
-
-						foreach ($confirmVariables[1] as $key => $valuePath) {
-							$action['confirmMessage'] = str_replace($confirmVariables[0][$key], Set::extract($valuePath, $data), $action['confirmMessage']);
-						}
-					}
-					$actions[] = array(
-						'name' => $action['name'],
-						'url' => Router::url($action['url'] + $trailingParams),
-						'options' => $action['options'],
-						'confirmMessage' => $action['confirmMessage']
-					);
-				}
-
-				return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'actions_column', array(
-					'actions' => $actions
-				));
-
-				break;
+				return $this->__actionsColumnData($column);
 			case 'image':
-				if (isset($column['options']['resize']) && $column['options']['resize']) {
-					$image = $this->Image->resize($value, $column['options']['resize']);
-				} else {
-					$image = $this->Html->image($value, $column['options']);
-				}
-
-				if (isset($column['url'])) {
-					$image = $this->Html->link($image, $column['url'], array('escape' => false));
-				}
-
-				return $image;
-				break;
+				return $this->__imageColumnData($value, $column);
 			case 'conditional':
-				$result = 'true';
-
-				foreach ($column['options']['conditions'] as $key => $value) {
-					if (Set::extract($key, $data) != $value) {
-						$result = 'false';
-						break;
-					}
-				}
-
-				if (!is_array($column['options'][$result])) {
-					return $column['options'][$result];
-				}
-
-				unset($column['options']['rawData']);
-				$column['options'] = array_merge($column['options'], $column['options'][$result]);
-
-				return $this->__generateColumnData($data, $column);
-
-				break;
+				return $this->__conditionalColumnData($data, $column);
 			case 'link':
 				return $this->Html->link($value, $value);
-				break;
 			case 'string':
 			default:
-				if (isset($column['options']['url'])) {
-					$trailingParams = array();
-					if (!empty($column['options']['trailingParams'])) {
-						foreach ($column['options']['trailingParams'] as $key => $param) {
-							$trailingParams[$key] = Set::extract($param, $data);
-						}
-					}
-
-					$url = $column['options']['url'];
-					if (is_array($url)) {
-						$url = $url + $trailingParams;
-					}
-
-					$value = $this->Html->link($value, $url);
-				}
-
-				return $value;
+				return $this->__stringColumnData($value, $data, $column);
 		}
+	}
+
+	private function __stringColumnData($value, $data, $column) {
+		if (isset($column['options']['url'])) {
+			$trailingParams = array();
+			if (!empty($column['options']['trailingParams'])) {
+				foreach ($column['options']['trailingParams'] as $key => $param) {
+					$trailingParams[$key] = Set::extract($param, $data);
+				}
+			}
+
+			$url = $column['options']['url'];
+			if (is_array($url)) {
+				$url = $url + $trailingParams;
+			}
+
+			$value = $this->Html->link($value, $url);
+		}
+
+		return $value;
+	}
+
+	private function __switcherColumnData($value, $column, $data) {
+		$value = intval($value);
+		$link = isset($column['options']['url']) ? $column['options']['url'] : '#';
+		$icon = isset($column['options']['icon']) ? ' ' . $column['options']['iconClass'] . ' ' . $column['options']['icon'] : '';
+
+		$class = $value == 1 ? 'enabled' : 'disabled';
+
+		$trailingParams = array();
+		if (!empty($column['options']['trailingParams'])) {
+			foreach ($column['options']['trailingParams'] as $key => $param) {
+				$trailingParams[$key] = Set::extract($param, $data);
+			}
+		}
+
+		if (is_array($link)) {
+			$link += $trailingParams;
+		}
+
+		$enabledLabel = isset($column['options']['label']['enabled']) ? $column['options']['label']['enabled'] : __('Enabled');
+		$disabledLabel = isset($column['options']['label']['disabled']) ? $column['options']['label']['disabled'] : __('Disabled');
+
+		$label = $value == 1 ? $enabledLabel : $disabledLabel;
+
+		return $this->Html->link($label, $link, array('class' => 'switcher ' . $class . $icon));
+	}
+
+	private function __actionsColumnData($data) {
+		$actions = array();
+		foreach ($this->__actions as $action) {
+			$trailingParams = array();
+			if (!empty($action['trailingParams'])) {
+				foreach ($action['trailingParams'] as $key => $param) {
+					$trailingParams[$key] = Set::extract($param, $data);
+				}
+			}
+
+			if ($action['confirmMessage']) {
+				preg_match_all('/{(.*?)}/', $action['confirmMessage'], $confirmVariables);
+
+				foreach ($confirmVariables[1] as $key => $valuePath) {
+					$action['confirmMessage'] = str_replace($confirmVariables[0][$key], Set::extract($valuePath, $data), $action['confirmMessage']);
+				}
+			}
+			$actions[] = array(
+				'name' => $action['name'],
+				'url' => Router::url($action['url'] + $trailingParams),
+				'options' => $action['options'],
+				'confirmMessage' => $action['confirmMessage']
+			);
+		}
+
+		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'actions_column', array(
+			'actions' => $actions
+		));
+	}
+
+	private function __imageColumnData($value, $column) {
+		if (isset($column['options']['resize']) && $column['options']['resize']) {
+			$image = $this->Image->resize($value, $column['options']['resize']);
+		} else {
+			$image = $this->Html->image($value, $column['options']);
+		}
+
+		if (isset($column['url'])) {
+			$image = $this->Html->link($image, $column['url'], array('escape' => false));
+		}
+
+		return $image;
+	}
+
+	private function __conditionalColumnData($data, $column) {
+		$result = 'true';
+
+		foreach ($column['options']['conditions'] as $key => $value) {
+			if (Set::extract($key, $data) != $value) {
+				$result = 'false';
+				break;
+			}
+		}
+
+		if (!is_array($column['options'][$result])) {
+			return $column['options'][$result];
+		}
+
+		unset($column['options']['rawData']);
+		$column['options'] = array_merge($column['options'], $column['options'][$result]);
+
+		return $this->__generateColumnData($data, $column);
 	}
 
 	public function generate($data, array $options = array()) {
@@ -311,7 +325,8 @@ class DataGridHelper extends AppHelper {
 
 	private function __expandRowEvents($gridOptions) {
 		$selector = '#' . $gridOptions['id'];
-		$this->Html->scriptBlock(<<<EXPAND
+
+		$script = <<<EXPAND
 			$('{$selector} tr[data-depth]').css('cursor', 'pointer');
 
 			$('{$selector} tr[data-depth]').filter(function() {
@@ -362,13 +377,15 @@ class DataGridHelper extends AppHelper {
 					}
 				}
 			});
-EXPAND
-		, array('inline' => false));
+EXPAND;
+
+		$this->Html->scriptBlock($script, array('inline' => false));
 	}
 
 	private function __addAjaxSort(array $gridOptions) {
 		$selector = '#' . $gridOptions['id'];
-		$this->Html->scriptBlock(<<<AJAXSORT
+
+		$script = <<<AJAXSORT
 			$('body').on('click', '{$selector} .sort', function(ev) {
 				ev.preventDefault();
 
@@ -376,13 +393,15 @@ EXPAND
 					$('{$this->__defaults['update']}').html(data);
 				});
 			});
-AJAXSORT
-		, array('inline' => false));
+AJAXSORT;
+
+		$this->Html->scriptBlock($script, array('inline' => false));
 	}
 
 	private function __addAjaxPagination(array $gridOptions) {
 		$selector = '#' . $gridOptions['id'];
-		$this->Html->scriptBlock(<<<AJAXSORT
+
+		$script = <<<AJAXSORT
 			$('body').on('click', '{$selector} .pagination a', function(ev) {
 				ev.preventDefault();
 
@@ -390,14 +409,15 @@ AJAXSORT
 					$('{$this->__defaults['update']}').html(data);
 				});
 			});
-AJAXSORT
-		, array('inline' => false));
+AJAXSORT;
+
+		$this->Html->scriptBlock($script, array('inline' => false));
 	}
 
 	private function __addAjaxSwitcher(array $gridOptions) {
 		$selector = '#' . $gridOptions['id'];
 
-		$this->Html->scriptBlock(<<<AJAXSORT
+		$script = <<<AJAXSORT
 			var switcher = function(el) {
 				if(el.hasClass('disabled')) {
 					el.removeClass('disabled');
@@ -421,14 +441,15 @@ AJAXSORT
 					switcher($(this));
 				}
 			});
-AJAXSORT
-, array('inline' => false));
+AJAXSORT;
+
+		$this->Html->scriptBlock($script, array('inline' => false));
 	}
 
 	private function __addAjaxFilter(array $gridOptions) {
 		$selector = '#' . $gridOptions['id'];
 
-		$this->Html->scriptBlock(<<<AJAXSORT
+		$script = <<<AJAXSORT
 			$('body').on('submit', '{$selector} .filter_form', function(ev) {
 				ev.preventDefault();
 
@@ -441,8 +462,9 @@ AJAXSORT
 					$('{$this->__defaults['update']}').html(html);
 				});
 			});
-AJAXSORT
-		, array('inline' => false));
+AJAXSORT;
+
+		$this->Html->scriptBlock($script, array('inline' => false));
 	}
 
 	public function pagination(array $options = array()) {
