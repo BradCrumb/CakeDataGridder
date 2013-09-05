@@ -4,7 +4,7 @@
  */
 class DataGridHelper extends AppHelper {
 
-	public $helpers = array('Html','Paginator','ImageCropResize.Image');
+	public $helpers = array('Html', 'Paginator', 'ImageCropResize.Image');
 
 	private $__columns = array();
 
@@ -43,7 +43,7 @@ class DataGridHelper extends AppHelper {
 
 		$this->__defaults = array_merge($this->__defaults, $settings);
 
-		$explode = explode('/',realpath(__DIR__ . DS . '..' . DS . '..'));
+		$explode = explode('/', realpath(__DIR__ . DS . '..' . DS . '..'));
 		$this->__pluginName = end($explode);
 	}
 
@@ -185,8 +185,12 @@ class DataGridHelper extends AppHelper {
 					$link += $trailingParams;
 				}
 
-				return $this->Html->link($value, $link, array('class' => 'switcher ' . $class . $icon));
-				break;
+				$enabledLabel = isset($column['options']['label']['enabled']) ? $column['options']['label']['enabled'] : __('Enabled');
+				$disabledLabel = isset($column['options']['label']['disabled']) ? $column['options']['label']['disabled'] : __('Disabled');
+
+				$label = $value == 1 ? $enabledLabel : $disabledLabel;
+
+				return $this->Html->link($label, $link, array('class' => 'switcher ' . $class . $icon));
 			case 'actions':
 				$actions = array();
 				foreach ($this->__actions as $action) {
@@ -418,7 +422,7 @@ AJAXSORT
 				}
 			});
 AJAXSORT
-		, array('inline' => false));
+, array('inline' => false));
 	}
 
 	private function __addAjaxFilter(array $gridOptions) {
