@@ -141,6 +141,28 @@ $this->DataGrid->addColumn('Active', 'User.active', array(
 
 You can see dat you can create conditions with as result a new column. So it is also possible to nest conditions. Simply use type `conditional` again, with `true` or `false`.
 
+#### Add multiple columns in one call
+It is also possible to add multiple columns in one method call. The `addColumns` method can be used.
+
+```php
+$this->DataGrid->addColumns(
+	array(
+		//Column 1
+		array(
+			'label' => 'Id',
+			'valuePath' => 'User.id',
+			'options' => array('sort' => true)
+		),
+
+		//Column 2
+		array(
+			'label' => 'Username',
+			'valuePath' => 'User.username',
+			'options' => array('sort' => true)
+		)
+	)
+);
+```
 
 ### Default DataGrid settings
 It is possible to set default settings for the DataGrid.
