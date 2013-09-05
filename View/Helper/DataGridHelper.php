@@ -61,6 +61,16 @@ class DataGridHelper extends AppHelper {
 		return $slug;
 	}
 
+	public function addColumns($columns) {
+		foreach ($columns as $column) {
+			if (!isset($column['label'])) {
+				throw new CakeException(__('No column label specified'));
+			}
+
+			$this->addColumn($column['label'], isset($column['valuePath']) ? $column['valuePath'] : null, isset($column['options']) ? $column['options'] : array());
+		}
+	}
+
 	public function addFilter($fieldName, array $options = array()) {
 		$options = array_merge($this->__defaults['filter'], $options);
 
