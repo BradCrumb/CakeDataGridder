@@ -6,6 +6,8 @@ if(!empty($filters)) {
 		echo $this->Form->input($filter['fieldName'], $filter['options']);
 	}
 
-	echo $this->Form->end();
+	$submit = isset($options['submit']) && $options['submit'] ? $options['submit'] : null;
+
+	echo $this->Form->end($submit);
 }
 ?>

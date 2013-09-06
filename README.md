@@ -175,7 +175,11 @@ $this->DataGrid->defaults(array(
 		'sort'				=> false,		//Sorting on or off
 		'type'				=> 'string',	//Type of the column
 		'htmlAttributes'	=> false,		//Other HTML attributes
-		'iconClass'			=> 'icon'		//Icon class
+		'header'			=> false,		//Header settings
+		'iconClass'			=> 'icon',		//Icon class
+		'indentOnThread'	=> false,		//Indent on threaded data
+		'indentSize'		=> 2,			//Indent size for nested grids
+		'rawData'			=> false		//Place this data one on one inside the field instead of searching for data
 	),
 	'grid'			=> array(				//Default grid settings
 		'class' => 'data_grid'				//Class for datagrid
@@ -183,7 +187,9 @@ $this->DataGrid->defaults(array(
 	'pagination'	=> array(				//Default settings for pagination
 		'numbers' => array()				//Default settings for numbers
 	),
-	'filter'		=> array()				//Default settings for filters
+	'filter'		=> array(				//Default settings for filters
+		'submit' => array()					//Settings for submit
+	)
 ));
 ```
 
