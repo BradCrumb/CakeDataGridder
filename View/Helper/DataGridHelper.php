@@ -77,7 +77,8 @@ class DataGridHelper extends AppHelper {
 			'numbers' => array(					//Default settings for numbers, default wrap into an <ul>
 				'tag' => 'li',
 				'before' => '<ul>',
-				'after' => '</ul>'
+				'after' => '</ul>',
+				'separator' => ''
 			)
 		),
 		'filter' => array(						//Default settings for filters
