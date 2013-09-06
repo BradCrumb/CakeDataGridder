@@ -83,11 +83,6 @@ class DataGridHelper extends AppHelper {
 	}
 
 	public function addAction($name, array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
-		//Check if we already have an actions column
-		if (!$this->__hasActionsColumn()) {
-			$this->addColumn(__('Actions'), null, array('type' => 'actions'));
-		}
-
 		$slug = Inflector::slug($name);
 
 		$this->__actions[$slug] = array(
@@ -112,6 +107,11 @@ class DataGridHelper extends AppHelper {
 	}
 
 	public function header() {
+		//Check if we already have an actions column
+		if (!empty($this->__actions) && !$this->__hasActionsColumn()) {
+			$this->addColumn(__('Actions'), null, array('type' => 'actions'));
+		}
+
 		$columns = $this->__columns;
 
 		foreach ($this->__columns as $key => $column) {
