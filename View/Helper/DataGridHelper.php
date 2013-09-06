@@ -337,7 +337,7 @@ class DataGridHelper extends AppHelper {
 	}
 
 	private function __expandRowEvents($gridOptions) {
-		$selector = '#' . $gridOptions['id'];
+		/*$selector = '#' . $gridOptions['id'];
 
 		$script = <<<EXPAND
 			$('{$selector} tr[data-depth]').css('cursor', 'pointer');
@@ -392,11 +392,11 @@ class DataGridHelper extends AppHelper {
 			});
 EXPAND;
 
-		$this->Html->scriptBlock($script, array('inline' => false));
+		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	private function __addAjaxSort(array $gridOptions) {
-		$selector = '#' . $gridOptions['id'];
+		/*$selector = '#' . $gridOptions['id'];
 
 		$script = <<<AJAXSORT
 			$('body').on('click', '{$selector} .sort', function(ev) {
@@ -408,11 +408,11 @@ EXPAND;
 			});
 AJAXSORT;
 
-		$this->Html->scriptBlock($script, array('inline' => false));
+		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	private function __addAjaxPagination(array $gridOptions) {
-		$selector = '#' . $gridOptions['id'];
+		/*$selector = '#' . $gridOptions['id'];
 
 		$script = <<<AJAXSORT
 			$('body').on('click', '{$selector} .pagination a', function(ev) {
@@ -424,7 +424,7 @@ AJAXSORT;
 			});
 AJAXSORT;
 
-		$this->Html->scriptBlock($script, array('inline' => false));
+		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	private function __addAjaxSwitcher(array $gridOptions) {
