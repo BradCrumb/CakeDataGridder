@@ -311,10 +311,6 @@ class DataGridHelper extends AppHelper {
 
 		$options = array_merge($this->__defaults['grid'], $options);
 
-		if (!isset($options['id'])) {
-			$options['id'] = 'DataGrid';
-		}
-
 		$options['data-update'] = $this->__defaults['update'];
 		$options['data-ajax'] = $this->__defaults['ajax'];
 
