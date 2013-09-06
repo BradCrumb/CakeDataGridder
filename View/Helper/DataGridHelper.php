@@ -31,7 +31,6 @@ class DataGridHelper extends AppHelper {
 		),
 		'grid' => array(
 			'class' => 'data_grid',
-			'data-update' => '#content'
 		),
 		'pagination' => array(
 			'numbers' => array()
@@ -316,14 +315,8 @@ class DataGridHelper extends AppHelper {
 			$options['id'] = 'DataGrid';
 		}
 
-		if ($this->__defaults['ajax']) {
-			/*$this->__addAjaxSort($options);
-			$this->__addAjaxPagination($options);
-			$this->__addAjaxSwitcher($options);
-			$this->__addAjaxFilter($options);*/
-		}
-
-		//$this->__expandRowEvents($options);
+		$options['data-update'] = $this->__defaults['update'];
+		$options['data-ajax'] = $this->__defaults['ajax'];
 
 		$this->Html->script($this->__pluginName . '.DataGrid', array('inline' => false));
 

@@ -137,10 +137,12 @@ DataGrid = (function() {
 			return $(el.parent(this.selector));
 		},
 		addEvents: function() {
-			this.__addSwitcherEvent();
-			this.__addSortEvent();
-			this.__addPaginationEvent();
-			this.__addFilterEvent();
+			if(this.element.data('ajax')) {
+				this.__addSwitcherEvent();
+				this.__addSortEvent();
+				this.__addPaginationEvent();
+				this.__addFilterEvent();
+			}
 			this.__addExpandRowEvent();
 		}
 	};
