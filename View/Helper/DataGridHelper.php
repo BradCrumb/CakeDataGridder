@@ -33,7 +33,11 @@ class DataGridHelper extends AppHelper {
 			'class' => 'data_grid',
 		),
 		'pagination' => array(
-			'numbers' => array()
+			'numbers' => array(
+				'tag' => 'li',
+				'before' => '<ul>',
+				'after' => '</ul>'
+			)
 		),
 		'filter' => array()
 	);
