@@ -39,7 +39,9 @@ class DataGridHelper extends AppHelper {
 				'after' => '</ul>'
 			)
 		),
-		'filter' => array()
+		'filter' => array(
+			'submit' => array()
+		)
 	);
 
 	public function __construct(View $View, $settings = array()) {
@@ -172,9 +174,12 @@ class DataGridHelper extends AppHelper {
 		));
 	}
 
-	public function filter() {
+	public function filter(array $options = array()) {
+		$options = array_merge($this->__defaults['filter'], $options);
+
 		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'filter', array(
-			'filters' => $this->__filters
+			'filters' => $this->__filters,
+			'options' => $options
 		));
 	}
 
