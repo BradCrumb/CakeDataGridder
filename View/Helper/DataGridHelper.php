@@ -255,12 +255,16 @@ class DataGridHelper extends AppHelper {
 				foreach ($confirmVariables[1] as $key => $valuePath) {
 					$action['confirmMessage'] = str_replace($confirmVariables[0][$key], Hash::get($data, $valuePath), $action['confirmMessage']);
 				}
+
+				$action['options']['data-confirm_message'] = $action['confirmMessage'];
+
+				$action['options']['class'] .= ' confirm_message';
 			}
+
 			$actions[] = array(
 				'name' => $action['name'],
 				'url' => $action['url'] + $trailingParams,
-				'options' => $action['options'],
-				'confirmMessage' => $action['confirmMessage']
+				'options' => $action['options']
 			);
 		}
 

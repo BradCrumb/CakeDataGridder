@@ -11,6 +11,7 @@ DataGrid = (function() {
 
 		this.selector = selector;
 		this.element = $(selector);
+		this.body = $('body');
 
 		this.addEvents();
 	}
@@ -28,7 +29,7 @@ DataGrid = (function() {
 		},
 		__addSwitcherEvent: function() {
 			var that = this;
-			$('body').on('click', this.selector + ' .switcher', function(ev) {
+			this.body.on('click', this.selector + ' .switcher', function(ev) {
 				ev.preventDefault();
 
 				if($(this).attr('href') && $(this).attr('href') != '#') {
@@ -43,7 +44,7 @@ DataGrid = (function() {
 		},
 		__addFilterEvent: function() {
 			var that = this;
-			$('body').on('submit', this.selector + ' .filter_form', function(ev) {
+			this.body.on('submit', this.selector + ' .filter_form', function(ev) {
 				ev.preventDefault();
 
 				var el = $(this),
@@ -57,7 +58,7 @@ DataGrid = (function() {
 		},
 		__addPaginationEvent: function() {
 			var that = this;
-			$('body').on('click', this.selector + ' .pagination a', function(ev) {
+			this.body.on('click', this.selector + ' .pagination a', function(ev) {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
@@ -67,12 +68,17 @@ DataGrid = (function() {
 		},
 		__addSortEvent: function() {
 			var that = this;
-			$('body').on('click', this.selector + ' .sort', function(ev) {
+			this.body.on('click', this.selector + ' .sort', function(ev) {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
 					$(that.get(this).data('update')).html(data);
 				});
+			});
+		},
+		__addConfirmEvent: function() {
+			this.body.on('click', this.selector + ' .confirm_message', function() {
+				return confirm($(this).data('confirm_message'));
 			});
 		},
 		__addExpandRowEvent: function() {
@@ -89,7 +95,7 @@ DataGrid = (function() {
 			});
 
 			var that = this;
-			$('body').on('click', this.selector + ' tr[data-depth]', function(ev) {
+			this.body.on('click', this.selector + ' tr[data-depth]', function(ev) {
 				if(ev.target.nodeName.toLowerCase() != 'a') {
 					ev.preventDefault();
 
@@ -143,6 +149,8 @@ DataGrid = (function() {
 				this.__addPaginationEvent();
 				this.__addFilterEvent();
 			}
+
+			this.__addConfirmEvent();
 			this.__addExpandRowEvent();
 		}
 	};
