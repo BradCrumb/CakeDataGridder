@@ -19,11 +19,11 @@ DataGrid = (function() {
 		switcher: function(el) {
 			if(el.hasClass('disabled')) {
 				el.removeClass('disabled');
-				el.text(1);
+				el.text(el.data('enabled_label'));
 			}
 			else {
 				el.addClass('disabled');
-				el.text(0);
+				el.text(el.data('disabled_label'));
 			}
 		},
 		__addSwitcherEvent: function() {
@@ -57,7 +57,7 @@ DataGrid = (function() {
 		},
 		__addPaginationEvent: function() {
 			var that = this;
-			$('body').on('click', '{$selector} .pagination a', function(ev) {
+			$('body').on('click', this.selector + ' .pagination a', function(ev) {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
@@ -67,7 +67,7 @@ DataGrid = (function() {
 		},
 		__addSortEvent: function() {
 			var that = this;
-			$('body').on('click', '{$selector} .sort', function(ev) {
+			$('body').on('click', this.selector + ' .sort', function(ev) {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
@@ -138,8 +138,14 @@ DataGrid = (function() {
 		},
 		addEvents: function() {
 			this.__addSwitcherEvent();
+			this.__addSortEvent();
+			this.__addPaginationEvent();
+			this.__addFilterEvent();
+			this.__addExpandRowEvent();
 		}
 	};
+
+	return DataGrid;
 })();
 
 $(document).ready(function() {

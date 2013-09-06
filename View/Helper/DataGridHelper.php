@@ -214,7 +214,7 @@ class DataGridHelper extends AppHelper {
 		return $value;
 	}
 
-	private function __switcherColumnData($value, $column, $data) {
+	private function __switcherColumnData($value, $data, $column) {
 		$value = intval($value);
 		$link = isset($column['options']['url']) ? $column['options']['url'] : '#';
 		$icon = isset($column['options']['icon']) ? ' ' . $column['options']['iconClass'] . ' ' . $column['options']['icon'] : '';
@@ -229,7 +229,7 @@ class DataGridHelper extends AppHelper {
 		}
 
 		if (is_array($link)) {
-			$link += $trailingParams;
+			$link = array_merge($link, $trailingParams);
 		}
 
 		$enabledLabel = isset($column['options']['label']['enabled']) ? $column['options']['label']['enabled'] : __('Enabled');
@@ -237,7 +237,7 @@ class DataGridHelper extends AppHelper {
 
 		$label = $value == 1 ? $enabledLabel : $disabledLabel;
 
-		return $this->Html->link($label, $link, array('class' => 'switcher ' . $class . $icon));
+		return $this->Html->link($label, $link, array('class' => 'switcher ' . $class . $icon, 'data-enabled_label' => $enabledLabel, 'data-disabled_label' => $disabledLabel));
 	}
 
 	private function __actionsColumnData($data) {
@@ -317,13 +317,13 @@ class DataGridHelper extends AppHelper {
 		}
 
 		if ($this->__defaults['ajax']) {
-			$this->__addAjaxSort($options);
+			/*$this->__addAjaxSort($options);
 			$this->__addAjaxPagination($options);
 			$this->__addAjaxSwitcher($options);
-			$this->__addAjaxFilter($options);
+			$this->__addAjaxFilter($options);*/
 		}
 
-		$this->__expandRowEvents($options);
+		//$this->__expandRowEvents($options);
 
 		$this->Html->script($this->__pluginName . '.DataGrid', array('inline' => false));
 
@@ -334,150 +334,6 @@ class DataGridHelper extends AppHelper {
 			'filter' => $filter,
 			'options' => $this->_parseAttributes($options)
 		));
-	}
-
-	private function __expandRowEvents($gridOptions) {
-		/*$selector = '#' . $gridOptions['id'];
-
-		$script = <<<EXPAND
-			$('{$selector} tr[data-depth]').css('cursor', 'pointer');
-
-			$('{$selector} tr[data-depth]').filter(function() {
-				return $(this).data('depth') > 0;
-			}).hide();
-
-			$('{$selector} tr[data-depth]').each(function() {
-				if($(this).data('depth') < $(this).next().data('depth')) {
-					$(this).addClass('expandable');
-				}
-			});
-
-			$('body').on('click', '{$selector} tr[data-depth]', function(ev) {
-				if(ev.target.nodeName.toLowerCase() != 'a') {
-					ev.preventDefault();
-
-					var nextDepth = $(this).data('depth') + 1,
-						next = $(this).next('tr[data-depth='+nextDepth+']'),
-						hide = false;
-
-					$(this).removeClass('collapsed').addClass('expanded');
-					if(next.is(':visible')) {
-						hide = true;
-						$(this).addClass('collapsed').removeClass('expanded');
-					}
-
-					if(next.length == 0) {
-						$(this).removeClass('collapsed').removeClass('expanded');
-					}
-
-					while(next.length > 0) {
-						if(!hide && next.data('depth') == nextDepth) {
-							next.show();
-							next.removeClass('collapsed').addClass('expanded');
-						}
-						else {
-							next.hide();
-							next.addClass('collapsed').removeClass('expanded');
-						}
-
-						if(next.next().length == 0 || next.next().data('depth') <= next.data('depth')+1) {
-							next.removeClass('collapsed').removeClass('expanded');
-						}
-
-						next = next.next('tr[data-depth]').filter(function() {
-							return $(this).data('depth') >= nextDepth;
-						});
-					}
-				}
-			});
-EXPAND;
-
-		$this->Html->scriptBlock($script, array('inline' => false));*/
-	}
-
-	private function __addAjaxSort(array $gridOptions) {
-		/*$selector = '#' . $gridOptions['id'];
-
-		$script = <<<AJAXSORT
-			$('body').on('click', '{$selector} .sort', function(ev) {
-				ev.preventDefault();
-
-				$.get($(this).attr('href'), function(data) {
-					$('{$this->__defaults['update']}').html(data);
-				});
-			});
-AJAXSORT;
-
-		$this->Html->scriptBlock($script, array('inline' => false));*/
-	}
-
-	private function __addAjaxPagination(array $gridOptions) {
-		/*$selector = '#' . $gridOptions['id'];
-
-		$script = <<<AJAXSORT
-			$('body').on('click', '{$selector} .pagination a', function(ev) {
-				ev.preventDefault();
-
-				$.get($(this).attr('href'), function(data) {
-					$('{$this->__defaults['update']}').html(data);
-				});
-			});
-AJAXSORT;
-
-		$this->Html->scriptBlock($script, array('inline' => false));*/
-	}
-
-	private function __addAjaxSwitcher(array $gridOptions) {
-		/*$selector = '#' . $gridOptions['id'];
-
-		$script = <<<AJAXSORT
-			var switcher = function(el) {
-				if(el.hasClass('disabled')) {
-					el.removeClass('disabled');
-					el.text(1);
-				}
-				else {
-					el.addClass('disabled');
-					el.text(0);
-				}
-			};
-
-			$('body').on('click', '{$selector} .switcher', function(ev) {
-				ev.preventDefault();
-
-				if($(this).attr('href') && $(this).attr('href') != '#') {
-					$.post($(this).attr('href'), $.proxy(function() {
-						switcher($(this));
-					},this));
-				}
-				else {
-					switcher($(this));
-				}
-			});
-AJAXSORT;
-
-		$this->Html->scriptBlock($script, array('inline' => false));*/
-	}
-
-	private function __addAjaxFilter(array $gridOptions) {
-		/*$selector = '#' . $gridOptions['id'];
-
-		$script = <<<AJAXSORT
-			$('body').on('submit', '{$selector} .filter_form', function(ev) {
-				ev.preventDefault();
-
-				var action = $(this).attr('action');
-				var search = $(this).find('.searchFormGrid').val();
-
-				var data = $(this).serialize();
-
-				$.post(action, data, function(html){
-					$('{$this->__defaults['update']}').html(html);
-				});
-			});
-AJAXSORT;
-
-		$this->Html->scriptBlock($script, array('inline' => false));*/
 	}
 
 	public function pagination(array $options = array()) {
