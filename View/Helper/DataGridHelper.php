@@ -353,7 +353,12 @@ class DataGridHelper extends AppHelper {
 			case 'conditional':
 				return $this->__conditionalColumnData($data, $column);
 			case 'link':
-				return $this->Html->link($value, $value);
+				$label = $value;
+
+				if (is_array($label)) {
+					$label = Router::url($value);
+				}
+				return $this->Html->link($label, $value);
 			case 'string':
 			default:
 				return $this->__stringColumnData($value, $data, $column);
