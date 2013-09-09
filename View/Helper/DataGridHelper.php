@@ -72,6 +72,7 @@ class DataGridHelper extends AppHelper {
 		),
 		'grid' => array(						//Default grid settings
 			'class' => 'data_grid',				//Class for datagrid
+			'element' => null					//Custom element to render, instead of default
 		),
 		'pagination' => array(					//Default settings for pagination
 			'numbers' => array(					//Default settings for numbers, default wrap into an <ul>
@@ -89,7 +90,8 @@ class DataGridHelper extends AppHelper {
 			)
 		),
 		'filter' => array(						//Default settings for filters
-			'submit' => array()					//Settings for submit
+			'submit' => array(),				//Settings for submit
+			'element' => null					//Custom element to render, instead of default
 		)
 	);
 
@@ -323,7 +325,9 @@ class DataGridHelper extends AppHelper {
 	public function filter(array $options = array()) {
 		$options = array_replace_recursive($this->__defaults['filter'], $options);
 
-		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'filter', array(
+		$element = isset($this->__defaults['filter']['element']) ? $this->__defaults['filter']['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'filter';
+
+		return $this->_View->element($element, array(
 			'filters' => $this->__filters,
 			'options' => $options
 		));
@@ -573,7 +577,9 @@ class DataGridHelper extends AppHelper {
 		//Load DataGrid javascript
 		$this->Html->script($this->__pluginName . '.DataGrid', array('inline' => false));
 
-		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'grid', array(
+		$element = isset($this->__defaults['grid']['element']) ? $this->__defaults['grid']['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'grid';
+
+		return $this->_View->element($element, array(
 			'header' => $header,
 			'rows' => $rows,
 			'pagination' => $pagination,
