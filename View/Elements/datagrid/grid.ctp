@@ -1,4 +1,4 @@
-<div  <?php echo $options;?>>
+<div <?php echo $options;?>>
 	<?php
 	if (!empty($filter)) {
 		echo $filter;
@@ -26,9 +26,19 @@
 			?>
 			<tfoot>
 				<tr>
-					<td class="pagination">
+					<td class="pagination" colspan="<?php echo isset($limit) ? $amountOfColumns - 1 : $amountOfColumns; ?>">
 						<?php echo $pagination;?>
 					</td>
+
+					<?php
+					if(isset($limit)) {
+						?>
+						<td class="limit">
+							<?php echo $limit;?>
+						</td>
+						<?php
+					}
+					?>
 				</tr>
 			</tfoot>
 			<?php

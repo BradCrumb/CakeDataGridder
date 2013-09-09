@@ -15,7 +15,7 @@ class DataGridHelper extends AppHelper {
  *
  * @var array
  */
-	public $helpers = array('Html', 'Paginator', 'ImageCropResize.Image');
+	public $helpers = array('Html', 'Paginator', 'ImageCropResize.Image', 'Form');
 
 /**
  * All the columns to render
@@ -63,7 +63,7 @@ class DataGridHelper extends AppHelper {
 		'column' => array(						//Default settings for columns
 			'sort'				=> false,		//Sorting on or off
 			'type'				=> 'string',	//Type of the column
-			'htmlAttributes'	=> false,		//Other HTML attributes
+			'htmlAttributes'	=> array(),		//Other HTML attributes
 			'header'			=> false,		//Header settings
 			'iconClass'			=> 'icon',		//Icon class
 			'indentOnThread'	=> false,		//Indent on threaded data
@@ -79,6 +79,13 @@ class DataGridHelper extends AppHelper {
 				'before' => '<ul>',
 				'after' => '</ul>',
 				'separator' => ''
+			),
+			'limit' => array(
+				'options' => array(10 => 10, 25 => 25, 100 => 100, 250 => 250),
+				'htmlAttributes' => array(
+					'empty' => false,
+					'id' => false
+				)
 			)
 		),
 		'filter' => array(						//Default settings for filters
@@ -555,6 +562,7 @@ class DataGridHelper extends AppHelper {
 		$header = $this->header();
 		$rows = $this->rows($data);
 		$pagination = $this->pagination();
+		$limit = $this->limit();
 		$filter = $this->filter();
 
 		$options = array_replace_recursive($this->__defaults['grid'], $options);
@@ -569,8 +577,10 @@ class DataGridHelper extends AppHelper {
 			'header' => $header,
 			'rows' => $rows,
 			'pagination' => $pagination,
+			'limit' => $limit,
 			'filter' => $filter,
-			'options' => $this->_parseAttributes($options)
+			'options' => $this->_parseAttributes($options),
+			'amountOfColumns' => count($this->__columns)
 		));
 	}
 
@@ -585,8 +595,30 @@ class DataGridHelper extends AppHelper {
 	public function pagination(array $options = array()) {
 		$options = array_replace_recursive($this->__defaults['pagination'], $options);
 
+		unset($options['limit']);
+
 		if ($this->Paginator->hasPage(1)) {
 			return $this->Paginator->numbers($options['numbers']);
+		}
+	}
+
+/**
+ * [limit description]
+ *
+ * @param  array  $options [description]
+ *
+ * @return [type]          [description]
+ */
+	public function limit(array $options = array()) {
+		$options = array_replace_recursive($this->__defaults['pagination']['limit'], $options);
+
+		if ($this->__defaults['pagination']['limit']) {
+			$attributes = $this->__defaults['pagination']['limit']['htmlAttributes'];
+
+			if (isset($this->request->query['limit'])) {
+				$attributes['value'] = $this->request->query['limit'];
+			}
+			return $this->Form->select('limit', $this->__defaults['pagination']['limit']['options'], $attributes);
 		}
 	}
 

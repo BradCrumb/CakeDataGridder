@@ -139,6 +139,14 @@ DataGrid = (function() {
 				next = next.next('tr[data-depth]').filter(checkDepth);
 			}
 		},
+		__addLimitEvent: function() {
+			var that = this;
+			this.body.on('change', this.selector + ' .limit select', function(ev) {
+				$.get(location.href + '?limit=' + $(this).val(), function(data) {
+					$(that.get(ev.target).data('update')).html(data);
+				});
+			});
+		},
 		get: function(el) {
 			return $(el).parents(this.selector).first();
 		},
@@ -152,6 +160,8 @@ DataGrid = (function() {
 
 			this.__addConfirmEvent();
 			this.__addExpandRowEvent();
+
+			this.__addLimitEvent();
 		}
 	};
 
