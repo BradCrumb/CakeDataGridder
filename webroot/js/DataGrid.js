@@ -140,7 +140,7 @@ DataGrid = (function() {
 			}
 		},
 		get: function(el) {
-			return $(el.parent(this.selector));
+			return $($(el).parent(this.selector));
 		},
 		addEvents: function() {
 			if(this.element.data('ajax')) {
