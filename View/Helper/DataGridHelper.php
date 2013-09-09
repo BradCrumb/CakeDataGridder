@@ -96,7 +96,7 @@ class DataGridHelper extends AppHelper {
 		parent::__construct($View, $settings);
 
 		//Merge given options with the default
-		$this->__defaults = array_merge($this->__defaults, $settings);
+		$this->__defaults = array_replace_recursive($this->__defaults, $settings);
 
 		$explode = explode('/', realpath(__DIR__ . DS . '..' . DS . '..'));
 		$this->__pluginName = end($explode);
@@ -114,7 +114,7 @@ class DataGridHelper extends AppHelper {
  */
 	public function addColumn($label, $valuePath, array $options = array()) {
 		//Merge given options with the default
-		$options = array_merge($this->__defaults['column'], $options);
+		$options = array_replace_recursive($this->__defaults['column'], $options);
 
 		$slug = Inflector::slug($label);
 
@@ -159,7 +159,7 @@ class DataGridHelper extends AppHelper {
  * @return String Fieldname
  */
 	public function addFilter($fieldName, array $options = array()) {
-		$options = array_merge($this->__defaults['filter'], $options);
+		$options = array_replace_recursive($this->__defaults['filter'], $options);
 
 		$this->__filters[$fieldName] = array(
 			'fieldName' => $fieldName,
@@ -266,7 +266,7 @@ class DataGridHelper extends AppHelper {
 			//Check if there are children and also render these rows
 			$children = isset($row['children']) ? $row['children'] : null;
 			if (!empty($children)) {
-				$rows = array_merge($rows, $this->rows($children, true, $depth + 1));
+				$rows = array_replace_recursive($rows, $this->rows($children, true, $depth + 1));
 			}
 		}
 
@@ -314,7 +314,7 @@ class DataGridHelper extends AppHelper {
  * @return String The rendered filter
  */
 	public function filter(array $options = array()) {
-		$options = array_merge($this->__defaults['filter'], $options);
+		$options = array_replace_recursive($this->__defaults['filter'], $options);
 
 		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'filter', array(
 			'filters' => $this->__filters,
@@ -425,7 +425,7 @@ class DataGridHelper extends AppHelper {
 		}
 
 		if (is_array($link)) {
-			$link = array_merge($link, $trailingParams);
+			$link = array_replace_recursive($link, $trailingParams);
 		}
 
 		//Set the enabled/disabled labels
@@ -534,7 +534,7 @@ class DataGridHelper extends AppHelper {
 		}
 
 		unset($column['options']['rawData']);
-		$column['options'] = array_merge($column['options'], $column['options'][$result]);
+		$column['options'] = array_replace_recursive($column['options'], $column['options'][$result]);
 
 		return $this->__generateColumnData($data, $column);
 	}
@@ -557,7 +557,7 @@ class DataGridHelper extends AppHelper {
 		$pagination = $this->pagination();
 		$filter = $this->filter();
 
-		$options = array_merge($this->__defaults['grid'], $options);
+		$options = array_replace_recursive($this->__defaults['grid'], $options);
 
 		$options['data-update'] = $this->__defaults['update'];
 		$options['data-ajax'] = $this->__defaults['ajax'];
@@ -583,7 +583,7 @@ class DataGridHelper extends AppHelper {
  * @return String Paginator numbers
  */
 	public function pagination(array $options = array()) {
-		$options = array_merge($this->__defaults['pagination'], $options);
+		$options = array_replace_recursive($this->__defaults['pagination'], $options);
 
 		if ($this->Paginator->hasPage(1)) {
 			return $this->Paginator->numbers($options['numbers']);
@@ -607,6 +607,6 @@ class DataGridHelper extends AppHelper {
  * @param array $options Options to overwrite
  */
 	public function defaults($options) {
-		$this->__defaults = array_merge($this->__defaults, $options);
+		$this->__defaults = array_replace_recursive($this->__defaults, $options);
 	}
 }

@@ -34,7 +34,7 @@ DataGrid = (function() {
 
 				if($(this).attr('href') && $(this).attr('href') != '#') {
 					$.post($(this).attr('href'), $.proxy(function() {
-						that.switcher($(this));
+						that.switcher($(ev.target));
 					},this));
 				}
 				else {
@@ -52,7 +52,7 @@ DataGrid = (function() {
 					data = el.serialize();
 
 				$.post(action, data, function(html){
-					$(that.get(this).data('update')).html(html);
+					$(that.get(ev.target).data('update')).html(html);
 				});
 			});
 		},
@@ -62,7 +62,7 @@ DataGrid = (function() {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
-					$(that.get(this).data('update')).html(data);
+					$(that.get(ev.target).data('update')).html(data);
 				});
 			});
 		},
@@ -72,7 +72,7 @@ DataGrid = (function() {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
-					$(that.get(this).data('update')).html(data);
+					$(that.get(ev.target).data('update')).html(data);
 				});
 			});
 		},
@@ -140,7 +140,7 @@ DataGrid = (function() {
 			}
 		},
 		get: function(el) {
-			return $($(el).parent(this.selector));
+			return $(el).parents(this.selector).first();
 		},
 		addEvents: function() {
 			if(this.element.data('ajax')) {
