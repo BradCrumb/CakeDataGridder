@@ -22,15 +22,17 @@
 			<?php
 		}
 
-		if (!empty($pagination)) {
+		if (!empty($pagination) || !empty($limit)) {
 			?>
 			<tfoot>
 				<tr>
-					<td class="pagination" colspan="<?php echo isset($limit) ? $amountOfColumns - 1 : $amountOfColumns; ?>">
-						<?php echo $pagination;?>
-					</td>
-
 					<?php
+					if(isset($pagination)) {?>
+						<td class="pagination" colspan="<?php echo isset($limit) ? $amountOfColumns - 1 : $amountOfColumns; ?>">
+							<?php echo $pagination;?>
+						</td>
+					<?php
+					}
 					if(isset($limit)) {
 						?>
 						<td class="limit">
