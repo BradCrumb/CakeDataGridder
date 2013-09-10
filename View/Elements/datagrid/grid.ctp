@@ -20,6 +20,16 @@
 				<?php echo $rows;?>
 			</tbody>
 			<?php
+		} else {
+			?>
+			<tbody>
+				<tr>
+					<td colspan="<?php echo $amountOfColumns; ?>">
+						<?php echo $noResultsMessage;?>
+					</td>
+				</tr>
+			</tbody>
+			<?php
 		}
 
 		if (!empty($pagination) || !empty($limit)) {

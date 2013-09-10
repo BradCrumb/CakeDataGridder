@@ -5,7 +5,10 @@ App::uses('PaginatorComponent', 'Controller/Component');
  * DataGrid Component
  * ===
  *
- *
+ * @author Marc-Jan Barnhoorn <github-bradcrumb@marc-jan.nl>
+ * @copyright 2013 (c), Marc-Jan Barnhoorn
+ * @package CakeDataGridder
+ * @license http://opensource.org/licenses/GPL-3.0 GNU GENERAL PUBLIC LICENSE
  */
 class DataGridComponent extends PaginatorComponent {
 
@@ -74,12 +77,19 @@ class DataGridComponent extends PaginatorComponent {
 		//Recall previous options
 		$this->__recallOptions();
 
-		$settings = $this->settings;
 		if ($this->Session->check("{$this->__sessionName}.settings")) {
-			$settings = array_merge($this->Session->read("{$this->__sessionName}.settings"), $settings);
+			$this->settings = array_merge($this->Session->read("{$this->__sessionName}.settings"), $this->settings);
 		}
 
-		$this->Session->write("{$this->__sessionName}.settings", $settings);
+		$this->Session->write("{$this->__sessionName}.settings", $this->settings);
+		//debug($this->Session->read("{$this->__sessionName}.filter"));exit();
+		if ($this->Session->check("{$this->__sessionName}.filter") && isset($controller->request->data['DataGridFilter'])) {
+			$controller->request->data['DataGridFilter'] = array_merge($this->Session->read("{$this->__sessionName}.filter"), $controller->request->data['DataGridFilter']);
+		}
+
+		if (isset($controller->request->data['DataGridFilter'])) {
+			$this->Session->write("{$this->__sessionName}.filter", $controller->request->data['DataGridFilter']);
+		}
 	}
 
 /**

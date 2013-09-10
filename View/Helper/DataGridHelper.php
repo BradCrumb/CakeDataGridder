@@ -84,8 +84,7 @@ class DataGridHelper extends AppHelper {
 			'prev' => array(					//Default settings for prev btn
 				'title' => '<< Previous',
 				'options' => array(
-					'tag' => 'li',
-
+					'tag' => 'li'
 				)
 			),
 			'next' => array(					//Default settings for next btn
@@ -107,7 +106,8 @@ class DataGridHelper extends AppHelper {
 		'filter' => array(						//Default settings for filters
 			'submit' => array(),				//Settings for submit
 			'element' => null					//Custom element to render, instead of default
-		)
+		),
+		'noResultsMessage' => 'No results'
 	);
 
 /**
@@ -601,7 +601,8 @@ class DataGridHelper extends AppHelper {
 			'limit' => $limit,
 			'filter' => $filter,
 			'options' => $this->_parseAttributes($options),
-			'amountOfColumns' => count($this->__columns)
+			'amountOfColumns' => count($this->__columns),
+			'noResultsMessage' => $this->__defaults['noResultsMessage']
 		));
 	}
 
