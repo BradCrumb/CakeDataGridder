@@ -75,12 +75,27 @@ class DataGridHelper extends AppHelper {
 			'element' => null					//Custom element to render, instead of default
 		),
 		'pagination' => array(					//Default settings for pagination
-			'numbers' => array(					//Default settings for numbers, default wrap into an <ul>
+			'numbers' => array(					//Default settings for numbers
 				'tag' => 'li',
-				'before' => '<ul>',
-				'after' => '</ul>',
+				'before' => '',
+				'after' => '',
 				'separator' => ''
 			),
+			'prev' => array(					//Default settings for prev btn
+				'title' => '<< Previous',
+				'options' => array(
+					'tag' => 'li',
+
+				)
+			),
+			'next' => array(					//Default settings for next btn
+				'title' => 'Next >>',
+				'options' => array(
+					'tag' => 'li',
+				)
+			),
+			'before' => '<ul>',					//Default wrapped in a ul
+			'after' => '</ul>',
 			'limit' => array(
 				'options' => array(10 => 10, 25 => 25, 100 => 100, 250 => 250),
 				'htmlAttributes' => array(
@@ -603,8 +618,13 @@ class DataGridHelper extends AppHelper {
 
 		unset($options['limit']);
 
-		if ($this->Paginator->hasPage(1)) {
-			return $this->Paginator->numbers($options['numbers']);
+		if ($this->Paginator->hasPage(2)) {
+			$prev = $this->Paginator->prev($options['prev']['title'], $options['prev']['options']);
+			$numbers = $this->Paginator->numbers($options['numbers']);
+			$next = $this->Paginator->next($options['next']['title'], $options['next']['options']);
+			return $options['before'] . $prev . $numbers . $next . $options['after'];
+		} else {
+			return '';
 		}
 	}
 
