@@ -186,7 +186,7 @@ class DataGridHelper extends AppHelper {
 		$options = array_replace_recursive($this->__defaults['filter'], $options);
 
 		$this->__filters[$fieldName] = array(
-			'fieldName' => $fieldName,
+			'fieldName' => 'DataGridFilter.' . $fieldName,
 			'options' => $options
 		);
 
@@ -282,15 +282,17 @@ class DataGridHelper extends AppHelper {
  */
 	public function rows($dataRows, $returnAsArray = false, $depth = 0) {
 		$rows = array();
-		foreach ($dataRows as $row) {
-			$renderedRow = $this->row($row, $depth);
+		if(is_array($dataRows)) {
+			foreach ($dataRows as $row) {
+				$renderedRow = $this->row($row, $depth);
 
-			$rows[] = $renderedRow;
+				$rows[] = $renderedRow;
 
-			//Check if there are children and also render these rows
-			$children = isset($row['children']) ? $row['children'] : null;
-			if (!empty($children)) {
-				$rows = array_replace_recursive($rows, $this->rows($children, true, $depth + 1));
+				//Check if there are children and also render these rows
+				$children = isset($row['children']) ? $row['children'] : null;
+				if (!empty($children)) {
+					$rows = array_replace_recursive($rows, $this->rows($children, true, $depth + 1));
+				}
 			}
 		}
 
@@ -451,7 +453,7 @@ class DataGridHelper extends AppHelper {
 		}
 
 		if (is_array($link)) {
-			$link = array_replace_recursive($link, $trailingParams);
+			$link = array_merge_recursive($link, $trailingParams);
 		}
 
 		//Set the enabled/disabled labels
@@ -620,9 +622,13 @@ class DataGridHelper extends AppHelper {
 		unset($options['limit']);
 
 		if ($this->Paginator->hasPage(2)) {
-			$prev = $this->Paginator->prev($options['prev']['title'], $options['prev']['options']);
+			$prevDisabledOptions = $options['prev']['options'];
+			$prevDisabledOptions['class'] = 'prev disabled';
+			$nextDisabledOptions = $options['next']['options'];
+			$nextDisabledOptions['class'] = 'next disabled';
+			$prev = $this->Paginator->prev($options['prev']['title'], $options['prev']['options'], null, $prevDisabledOptions);
 			$numbers = $this->Paginator->numbers($options['numbers']);
-			$next = $this->Paginator->next($options['next']['title'], $options['next']['options']);
+			$next = $this->Paginator->next($options['next']['title'], $options['next']['options'], null, $nextDisabledOptions);
 			return $options['before'] . $prev . $numbers . $next . $options['after'];
 		} else {
 			return '';
