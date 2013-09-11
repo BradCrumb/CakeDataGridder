@@ -82,9 +82,14 @@ class DataGridComponent extends PaginatorComponent {
 		}
 
 		$this->Session->write("{$this->__sessionName}.settings", $this->settings);
-		//debug($this->Session->read("{$this->__sessionName}.filter"));exit();
-		if ($this->Session->check("{$this->__sessionName}.filter") && isset($controller->request->data['DataGridFilter'])) {
-			$controller->request->data['DataGridFilter'] = array_merge($this->Session->read("{$this->__sessionName}.filter"), $controller->request->data['DataGridFilter']);
+
+		//Save the filter to the session
+		if ($this->Session->check("{$this->__sessionName}.filter")) {
+			if (isset($controller->request->data['DataGridFilter'])) {
+				$controller->request->data['DataGridFilter'] = array_merge($this->Session->read("{$this->__sessionName}.filter"), $controller->request->data['DataGridFilter']);
+			} else {
+				$controller->request->data['DataGridFilter'] = $this->Session->read("{$this->__sessionName}.filter");
+			}
 		}
 
 		if (isset($controller->request->data['DataGridFilter'])) {
