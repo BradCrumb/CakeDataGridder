@@ -19,11 +19,11 @@ DataGrid = (function() {
 	DataGrid.prototype = {
 		switcher: function(el) {
 			if(el.hasClass('disabled')) {
-				el.removeClass('disabled');
+				el.addClass('enabled').removeClass('disabled');
 				el.text(el.data('enabled_label'));
 			}
 			else {
-				el.addClass('disabled');
+				el.removeClass('enabled').addClass('disabled');
 				el.text(el.data('disabled_label'));
 			}
 		},
