@@ -68,7 +68,16 @@ class DataGridHelper extends AppHelper {
 			'iconClass'			=> 'icon',		//Icon class
 			'indentOnThread'	=> false,		//Indent on threaded data
 			'indentSize'		=> 2,			//Indent size for nested grids
-			'rawData'			=> false		//Place this data one on one inside the field instead of searching for data
+			'rawData'			=> false,		//Place this data one on one inside the field instead of searching for data
+			'filter'			=> array(
+				'label'			=> '&or;',
+				'htmlAttributes' => array(
+					'class' => 'column-filter',
+					'escape' => false
+				),
+				'options'		=> array(),
+				'active_field' => null
+			)
 		),
 		'grid' => array(						//Default grid settings
 			'class' => 'data_grid',				//Class for datagrid
@@ -105,7 +114,8 @@ class DataGridHelper extends AppHelper {
 		),
 		'filter' => array(						//Default settings for filters
 			'submit' => array(),				//Settings for submit
-			'element' => null					//Custom element to render, instead of default
+			'element' => null,					//Custom element to render, instead of default
+			'options' => array()
 		),
 		'noResultsMessage' => 'No results'
 	);
@@ -183,7 +193,7 @@ class DataGridHelper extends AppHelper {
  * @return String Fieldname
  */
 	public function addFilter($fieldName, array $options = array()) {
-		$options = array_replace_recursive($this->__defaults['filter'], $options);
+		$options = array_replace_recursive($this->__defaults['filter']['options'], $options);
 
 		$this->__filters[$fieldName] = array(
 			'fieldName' => 'DataGridFilter.' . $fieldName,
@@ -257,6 +267,14 @@ class DataGridHelper extends AppHelper {
 			if ($column['options']['header']) {
 				$columns[$key]['options']['header'] = $this->_parseAttributes($column['options']['header']);
 			}
+
+			$columns[$key]['options']['filter']['htmlAttributes']['class'] = (!isset($columns[$key]['options']['filter']['htmlAttributes']['class']) ? :$columns[$key]['options']['filter']['htmlAttributes']['class']);
+
+			if (isset($this->request->data['DataGridColumnFilter'][$column['value_path']])) {
+				$columns[$key]['options']['filter']['htmlAttributes']['class'] .= ' filtered';
+
+				$columns[$key]['options']['filter']['active_field'] = $this->request->data['DataGridColumnFilter'][$column['value_path']];
+			}
 		}
 
 		return $this->_View->element($this->__elementsDir . DS . 'headers', array(
@@ -282,7 +300,7 @@ class DataGridHelper extends AppHelper {
  */
 	public function rows($dataRows, $returnAsArray = false, $depth = 0) {
 		$rows = array();
-		if(is_array($dataRows)) {
+		if (is_array($dataRows)) {
 			foreach ($dataRows as $row) {
 				$renderedRow = $this->row($row, $depth);
 
@@ -313,6 +331,7 @@ class DataGridHelper extends AppHelper {
  * @return String The rendered row
  */
 	public function row($data, $depth = 0) {
+
 		$rowData = array(
 			'columns' => array(),
 			'depth' => $depth
@@ -342,6 +361,8 @@ class DataGridHelper extends AppHelper {
 	public function filter(array $options = array()) {
 		$options = array_replace_recursive($this->__defaults['filter'], $options);
 
+		unset($options['filter']['options']);
+
 		$element = isset($this->__defaults['filter']['element']) ? $this->__defaults['filter']['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'filter';
 
 		return $this->_View->element($element, array(
@@ -369,9 +390,10 @@ class DataGridHelper extends AppHelper {
 		} elseif (!empty($column['value_path'])) {
 			$value = Hash::get($data, $column['value_path']);
 		}
-
 		//Generate the correct column data
 		switch($column['options']['type']) {
+			case 'checkbox':
+				return $this->__checkboxColumnData($value, $data, $column);
 			case 'switcher':
 				return $this->__switcherColumnData($value, $data, $column);
 			case 'actions':
@@ -391,6 +413,32 @@ class DataGridHelper extends AppHelper {
 			default:
 				return $this->__stringColumnData($value, $data, $column);
 		}
+	}
+
+/**
+ * Generate a Checkbox column
+ * ---
+ *
+ * Generates a column with a checkbox.
+ *
+ * @param String $value Data value
+ * @param array $data Data record
+ * @param array $column Column options
+ *
+ * @return String The generated column
+ */
+	private function __checkboxColumnData($value, $data, $column) {
+		if (array_key_exists('name', $column['options'])) {
+			$name = trim($column['options']['name']);
+			if (array_key_exists('replacement', $column['options']) && stripos($name, 'pattern')) {
+				$name = preg_replace('/#pattern#/i', $data[$column['options']['replacement']], $name);
+			}
+		}
+		else{
+			return null;
+		}
+
+		return $this->Form->input($name, array('label' => false, 'type' => 'checkbox', 'checked' => (bool)$value, 'div' => false));
 	}
 
 /**
@@ -643,6 +691,10 @@ class DataGridHelper extends AppHelper {
  * @return [type]          [description]
  */
 	public function limit(array $options = array()) {
+		if (!$this->__defaults['pagination']['limit']) {
+			return;
+		}
+
 		$options = array_replace_recursive($this->__defaults['pagination']['limit'], $options);
 
 		if ($this->__defaults['pagination']['limit']) {

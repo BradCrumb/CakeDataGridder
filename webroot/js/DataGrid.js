@@ -12,6 +12,8 @@ DataGrid = (function() {
 		this.selector = selector;
 		this.element = $(selector);
 		this.body = $('body');
+		// Nodenames of elements that should be clickable in a table row
+		this.enabledElements = ['a', 'input'];
 
 		this.addEvents();
 	}
@@ -27,17 +29,36 @@ DataGrid = (function() {
 				el.text(el.data('disabled_label'));
 			}
 		},
+		/**
+		 * attach and handle switch event
+		 * @todo show formatted message instead of
+		 * @return {void}
+		 */
 		__addSwitcherEvent: function() {
 			var that = this;
 			this.body.on('click', this.selector + ' .switcher', function(ev) {
 				ev.preventDefault();
 
 				if($(this).attr('href') && $(this).attr('href') != '#') {
-					$.post($(this).attr('href'), $.proxy(function() {
-						that.switcher($(ev.target));
+					var xhr = $.post($(this).attr('href'),
+						$.proxy(function(data, textStatus, jqXHR) {
+							that.switcher($(ev.target));
+							that.__gridUpdated();
+						}, this));
 
-						that.__gridUpdated();
-					},this));
+					xhr.done(function(data, textStatus, jqXHR){
+						// Success message
+						if (jqXHR.responseText) {
+							alert(jqXHR.responseText);
+						}
+					});
+
+					xhr.fail(function(jqXHR){
+						// Error message
+						if (jqXHR.responseText) {
+							alert(jqXHR.responseText);
+						}
+					});
 				}
 				else {
 					that.switcher($(this));
@@ -90,7 +111,7 @@ DataGrid = (function() {
 			});
 		},
 		__addExpandRowEvent: function() {
-			$(this.selector + ' tr[data-depth]').css('cursor', 'pointer');
+			//$(this.selector + ' tr[data-depth]').css('cursor', 'pointer');
 
 			$(this.selector + ' tr[data-depth]').filter(function() {
 				return $(this).data('depth') > 0;
@@ -104,7 +125,7 @@ DataGrid = (function() {
 
 			var that = this;
 			this.body.on('click', this.selector + ' tr[data-depth]', function(ev) {
-				if(ev.target.nodeName.toLowerCase() != 'a') {
+				if(-1 == $.inArray(ev.target.nodeName.toLowerCase(), that.enabledElements)) {
 					ev.preventDefault();
 
 					that.__rowExpandToggle($(this));
@@ -160,6 +181,30 @@ DataGrid = (function() {
 		__gridUpdated: function() {
 			$(this.selector).trigger('gridupdated');
 		},
+		__addGridColumnFilter: function() {
+			if($('.column-filter-options',this.selector).is(':visible')) {
+				$('.column-filter-options',this.selector).hide();
+			}
+
+			this.body.on('click', this.selector + ' .column-filter', function(ev) {
+				ev.preventDefault();
+				$(this).next('.column-filter-options').toggle();
+			});
+
+			var that = this;
+			this.body.on('click', this.selector + ' .column-filter-options a', function(ev) {
+				ev.preventDefault();
+
+				var object = {};
+				object['data[DataGridColumnFilter][' + $(this).data('field') + ']'] = $(this).data('key');
+
+				$.post(location.href, object, function(data) {
+					$(that.get(ev.target).data('update')).html(data);
+
+					that.__gridUpdated();
+				});
+			});
+		},
 		get: function(el) {
 			return $(el).parents(this.selector).first();
 		},
@@ -170,6 +215,8 @@ DataGrid = (function() {
 				this.__addPaginationEvent();
 				this.__addFilterEvent();
 			}
+
+			this.__addGridColumnFilter();
 
 			this.__addConfirmEvent();
 			this.__addExpandRowEvent();

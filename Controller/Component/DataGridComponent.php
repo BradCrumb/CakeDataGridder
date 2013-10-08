@@ -95,6 +95,27 @@ class DataGridComponent extends PaginatorComponent {
 		if (isset($controller->request->data['DataGridFilter'])) {
 			$this->Session->write("{$this->__sessionName}.filter", $controller->request->data['DataGridFilter']);
 		}
+
+		//Save the column filter to the session
+		if ($this->Session->check("{$this->__sessionName}.column_filter")) {
+			if (isset($controller->request->data['DataGridColumnFilter'])) {
+				$controller->request->data['DataGridColumnFilter'] = array_merge($this->Session->read("{$this->__sessionName}.column_filter"), $controller->request->data['DataGridColumnFilter']);
+			} else {
+				$controller->request->data['DataGridColumnFilter'] = $this->Session->read("{$this->__sessionName}.column_filter");
+			}
+		}
+
+		if (isset($controller->request->data['DataGridColumnFilter'])) {
+			$this->Session->write("{$this->__sessionName}.column_filter", $controller->request->data['DataGridColumnFilter']);
+
+			foreach ($controller->request->data['DataGridColumnFilter'] as $fieldName => $value) {
+				if (!empty($value)) {
+					$this->settings['conditions'][$fieldName] = $value;
+				} else {
+					unset($this->settings['conditions'][$fieldName]);
+				}
+			}
+		}
 	}
 
 /**
@@ -120,6 +141,10 @@ class DataGridComponent extends PaginatorComponent {
 		}
 
 		$this->Session->write("{$this->__sessionName}.settings", $settings);
+
+		if (!$this->Session->check("{$this->__sessionName}.options.limit") && isset($this->settings['limit'])) {
+			$this->Session->write("{$this->__sessionName}.options.limit", $this->settings['limit']);
+		}
 
 		//Call original paginate
 		return parent::paginate($object, $scope, $whitelist);
