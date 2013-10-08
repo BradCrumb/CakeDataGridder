@@ -83,11 +83,13 @@ A switcher column switches a field between 2 states: enabled and disabled.
 ```php
 $this->DataGrid->addColumn('Active', 'User.active', array(
 	'type'				=> 'switcher',
-	'url'				=> array(				//The url where the switch is triggered
-		'action' => 'active'
-	),
-	'trailingParams'	=> array('User.id'),	//Parameters to add to the url
-	'icon'				=> 'active' 			//Add the default Icon class and the active class
+	'options' => array(
+		'url'				=> array(				//The url where the switch is triggered
+			'action' => 'active'
+		),
+		'trailingParams'	=> array('User.id'),	//Parameters to add to the url
+		'icon'				=> 'active' 			//Add the default Icon class and the active class
+	)
 ));
 ```
 
