@@ -117,7 +117,7 @@ class DataGridHelper extends AppHelper {
 			'element' => null,					//Custom element to render, instead of default
 			'options' => array()
 		),
-		'noResultsMessage' => 'No results'
+		'noResultsMessage' => null				//The default can be found in the constructor because we have to translate the text
 	);
 
 /**
@@ -128,6 +128,8 @@ class DataGridHelper extends AppHelper {
  */
 	public function __construct(View $View, $settings = array()) {
 		parent::__construct($View, $settings);
+
+		$this->__defaults['noResultsMessage'] = __('No results');
 
 		//Merge given options with the default
 		$this->__defaults = array_replace_recursive($this->__defaults, $settings);
@@ -271,7 +273,9 @@ class DataGridHelper extends AppHelper {
 			$columns[$key]['options']['filter']['htmlAttributes']['class'] = (!isset($columns[$key]['options']['filter']['htmlAttributes']['class']) ? :$columns[$key]['options']['filter']['htmlAttributes']['class']);
 
 			if (isset($this->request->data['DataGridColumnFilter'][$column['value_path']])) {
-				$columns[$key]['options']['filter']['htmlAttributes']['class'] .= ' filtered';
+				if (!empty($this->request->data['DataGridColumnFilter'][$column['value_path']])) {
+					$columns[$key]['options']['filter']['htmlAttributes']['class'] .= ' filtered';
+				}
 
 				$columns[$key]['options']['filter']['active_field'] = $this->request->data['DataGridColumnFilter'][$column['value_path']];
 			}
