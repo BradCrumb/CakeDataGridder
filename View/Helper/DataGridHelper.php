@@ -15,7 +15,7 @@ class DataGridHelper extends AppHelper {
  *
  * @var array
  */
-	public $helpers = array('Html', 'Paginator', 'ImageCropResize.Image', 'Form');
+	public $helpers = array('Html', 'DataGridder.DataGridPaginator', 'ImageCropResize.Image', 'Form');
 
 /**
  * All the columns to render
@@ -673,14 +673,14 @@ class DataGridHelper extends AppHelper {
 
 		unset($options['limit']);
 
-		if ($this->Paginator->hasPage(2)) {
+		if ($this->DataGridPaginator->hasPage(2)) {
 			$prevDisabledOptions = $options['prev']['options'];
 			$prevDisabledOptions['class'] = 'prev disabled';
 			$nextDisabledOptions = $options['next']['options'];
 			$nextDisabledOptions['class'] = 'next disabled';
-			$prev = $this->Paginator->prev($options['prev']['title'], $options['prev']['options'], null, $prevDisabledOptions);
-			$numbers = $this->Paginator->numbers($options['numbers']);
-			$next = $this->Paginator->next($options['next']['title'], $options['next']['options'], null, $nextDisabledOptions);
+			$prev = $this->DataGridPaginator->prev($options['prev']['title'], $options['prev']['options'], null, $prevDisabledOptions);
+			$numbers = $this->DataGridPaginator->numbers($options['numbers']);
+			$next = $this->DataGridPaginator->next($options['next']['title'], $options['next']['options'], null, $nextDisabledOptions);
 			return $options['before'] . $prev . $numbers . $next . $options['after'];
 		} else {
 			return '';
