@@ -547,7 +547,11 @@ class DataGridHelper extends AppHelper {
 
 				$action['options']['data-confirm_message'] = $action['confirmMessage'];
 
-				$action['options']['class'] .= ' confirm_message';
+				if (isset($action['options']['class'])) {
+					$action['options']['class'] .= ' confirm_message';
+				} else {
+					$action['options']['class'] = 'confirm_message';
+				}
 			}
 
 			$actions[] = array(
