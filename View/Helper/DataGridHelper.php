@@ -69,6 +69,7 @@ class DataGridHelper extends AppHelper {
 			'indentOnThread'	=> false,		//Indent on threaded data
 			'indentSize'		=> 2,			//Indent size for nested grids
 			'rawData'			=> false,		//Place this data one on one inside the field instead of searching for data
+			'escape'			=> false,		//HTML escape retrieved data
 			'filter'			=> array(
 				'label'			=> '&or;',
 				'htmlAttributes' => array(
@@ -412,7 +413,7 @@ class DataGridHelper extends AppHelper {
 				if (is_array($label)) {
 					$label = Router::url($value);
 				}
-				return $this->Html->link($label, $value);
+				return $this->Html->link($label, $value, array('escape' => !empty($column['options']['escape'])));
 			case 'formatted':
 				return $this->__formattedColumnData($data, $column);
 			case 'string':
@@ -437,7 +438,8 @@ class DataGridHelper extends AppHelper {
 		if (array_key_exists('name', $column['options'])) {
 			$name = trim($column['options']['name']);
 			if (array_key_exists('replacement', $column['options']) && stripos($name, 'pattern')) {
-				$name = preg_replace('/#pattern#/i', $data[$column['options']['replacement']], $name);
+				$rawValue = $data[$column['options']['replacement']];
+				$name = preg_replace('/#pattern#/i', (!empty($column['options']['escape']) ? h($rawValue) : $rawValue), $name);
 			}
 		}
 		else{
@@ -473,7 +475,9 @@ class DataGridHelper extends AppHelper {
 				$url = $url + $trailingParams;
 			}
 
-			$value = $this->Html->link($value, $url);
+			$value = $this->Html->link($value, $url, array('escape' => !empty($column['options']['escape'])));
+		} else {
+			$value = h($value);
 		}
 
 		return $value;
@@ -658,7 +662,8 @@ class DataGridHelper extends AppHelper {
 
 		$values = array();
 		foreach($valuePaths as $valuePath) {
-			$values[] = Hash::get($data, $valuePath);
+			$rawValue = Hash::get($data, $valuePath);
+			$values[] = (!empty($column['options']['escape']) ? h($rawValue) : $rawValue);
 		}
 
 		//Get span classes if present
@@ -701,7 +706,7 @@ class DataGridHelper extends AppHelper {
 			}
 
 			for($i = 0; $i < $amountValues; $i++) {
-				$formatResults[$formatMatches[0][$i][1]] = $this->Html->tag('span', $formatMatches[0][$i][0], array('class' => $classes[$i], 'escape' => true));
+				$formatResults[$formatMatches[0][$i][1]] = $this->Html->tag('span', $formatMatches[0][$i][0], array('class' => $classes[$i]));
 			}
 
 			$column['options']['formatString'] = implode($formatResults);
