@@ -249,6 +249,7 @@ $this->DataGrid->defaults(array(
 		'indentOnThread'	=> false,		//Indent on threaded data
 		'indentSize'		=> 2,			//Indent size for nested grids
 		'rawData'			=> false		//Place this data one on one inside the field instead of searching for data
+		'escape'			=> false		//HTML escape retrieved data
 	),
 	'grid'			=> array(				//Default grid settings
 		'class' => 'data_grid'				//Class for datagrid
