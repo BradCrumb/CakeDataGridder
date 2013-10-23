@@ -1,5 +1,5 @@
 <?php
-App::uses('PaginatorHelper', 'Helper');
+App::uses('PaginatorHelper', 'View/Helper');
 
 /**
  * DataGrid helper
