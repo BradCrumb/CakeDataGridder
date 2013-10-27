@@ -285,9 +285,6 @@ class DataGridHelper extends AppHelper {
 
 		return $this->_View->element($element, array(
 			'headers' => $columns
-		),
-		array(
-			'plugin' => $this->__pluginName
 		));
 	}
 
