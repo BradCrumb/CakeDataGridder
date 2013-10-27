@@ -257,7 +257,7 @@ class DataGridHelper extends AppHelper {
  *
  * @return String Rendered header
  */
-	public function header() {
+	public function header(array $options = array()) {
 		//Check if we already have an actions column
 		if (!empty($this->__actions) && !$this->__hasActionsColumn()) {
 			$this->addColumn(__('Actions'), null, array('type' => 'actions'));
@@ -281,7 +281,9 @@ class DataGridHelper extends AppHelper {
 			}
 		}
 
-		return $this->_View->element($this->__elementsDir . DS . 'headers', array(
+		$element = isset($options['element']) ? $options['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'headers';
+
+		return $this->_View->element($element, array(
 			'headers' => $columns
 		),
 		array(
@@ -334,8 +336,7 @@ class DataGridHelper extends AppHelper {
  *
  * @return String The rendered row
  */
-	public function row($data, $depth = 0) {
-
+	public function row($data, $depth = 0, array $options = array()) {
 		$rowData = array(
 			'columns' => array(),
 			'depth' => $depth
@@ -349,7 +350,9 @@ class DataGridHelper extends AppHelper {
 			);
 		}
 
-		return $this->_View->element($this->__pluginName . '.' . $this->__elementsDir . DS . 'row', array(
+		$element = isset($options['element']) ? $options['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'row';
+
+		return $this->_View->element($element, array(
 			'rowData' => $rowData
 		));
 	}
@@ -441,8 +444,7 @@ class DataGridHelper extends AppHelper {
 			if (array_key_exists('replacement', $column['options']) && stripos($name, 'pattern')) {
 				$name = preg_replace('/#pattern#/i', $data[$column['options']['replacement']], $name);
 			}
-		}
-		else{
+		} else {
 			return null;
 		}
 
@@ -627,8 +629,8 @@ class DataGridHelper extends AppHelper {
  * Generate a datetime column
  * ---
  *
- * Show a formatted date 
- * 
+ * Show a formatted date
+ *
  * @param  array $data Data record
  * @param  array $column Column options
  * @return String The formatted date
@@ -658,7 +660,7 @@ class DataGridHelper extends AppHelper {
  * Check whether the given string is a timestamp
  *
  * @todo what checks should be used to determine if a string is a timestamp
- * 
+ *
  * @param  String $timestamp
  * @return Boolean
  */
@@ -678,29 +680,22 @@ class DataGridHelper extends AppHelper {
  * @return String Full generated DataGrid
  */
 	public function generate($data, array $options = array()) {
-		//Render all the needed elements
-		$header = $this->header();
-		$rows = $this->rows($data);
-		$pagination = $this->pagination();
-		$limit = $this->limit();
-		$filter = $this->filter();
-
 		$options = array_replace_recursive($this->__defaults['grid'], $options);
 
 		$options['data-update'] = $this->__defaults['update'];
 		$options['data-ajax'] = $this->__defaults['ajax'];
 
 		//Load DataGrid javascript
-		$this->Html->script($this->__pluginName . '.DataGrid', array('inline' => false));
+		$this->script();
 
 		$element = isset($this->__defaults['grid']['element']) ? $this->__defaults['grid']['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'grid';
 
 		return $this->_View->element($element, array(
-			'header' => $header,
-			'rows' => $rows,
-			'pagination' => $pagination,
-			'limit' => $limit,
-			'filter' => $filter,
+			'header' => $this->header(),
+			'rows' => $this->rows($data),
+			'pagination' => $this->pagination(),
+			'limit' => $this->limit(),
+			'filter' => $this->filter(),
 			'options' => $this->_parseAttributes($options),
 			'amountOfColumns' => count($this->__columns),
 			'noResultsMessage' => $this->__defaults['noResultsMessage']
@@ -735,11 +730,14 @@ class DataGridHelper extends AppHelper {
 	}
 
 /**
- * [limit description]
+ * Limit dropdown
+ * ---
  *
- * @param  array  $options [description]
+ * Create a dropdown to limit the DataGrid
  *
- * @return [type]          [description]
+ * @param array $options Options for the limit field, like the chooseable "options" and "htmlAttributes"
+ *
+ * @return String Generated Limit field
  */
 	public function limit(array $options = array()) {
 		if (!$this->__defaults['pagination']['limit']) {
@@ -776,5 +774,21 @@ class DataGridHelper extends AppHelper {
  */
 	public function defaults($options) {
 		$this->__defaults = array_replace_recursive($this->__defaults, $options);
+	}
+
+/**
+ * Load the DataGrid Javascript
+ * ---
+ *
+ * @param array $options Options to passthrough Html script, defaults to inline => false
+ *
+ * @return void/String Nothing or the returned script block
+ */
+	public function script(array $options = array()) {
+		$options = array_replace_recursive(array(
+			'inline' => false
+		), $options);
+
+		return $this->Html->script($this->__pluginName . '.DataGrid', $options);
 	}
 }

@@ -159,7 +159,7 @@ class DataGridComponent extends PaginatorComponent {
 	private function __recallOptions() {
 		if ($this->Session->check("{$this->__sessionName}.options")) {
 			$options = $this->Session->read("{$this->__sessionName}.options");
-			//debug($this->settings['paramType']);exit();
+
 			$this->__controller->passedArgs = array_merge($this->__controller->passedArgs, $options);
 			switch($this->settings['paramType']) {
 				case 'named':
