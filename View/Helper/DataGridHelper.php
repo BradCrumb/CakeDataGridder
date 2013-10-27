@@ -4,7 +4,8 @@
  * ===
  *
  * @author Marc-Jan Barnhoorn <github-bradcrumb@marc-jan.nl>
- * @copyright 2013 (c), Marc-Jan Barnhoorn
+ * @author Patrick Langendoen <github-bradcrumb@patricklangendoen.nl>
+ * @copyright 2013 (c), Marc-Jan Barnhoorn & Patrick Langendoen
  * @package CakeDataGridder
  * @license http://opensource.org/licenses/GPL-3.0 GNU GENERAL PUBLIC LICENSE
  */
@@ -395,8 +396,20 @@ class DataGridHelper extends AppHelper {
 		if (isset($column['options']['rawData']) && $column['options']['rawData']) {
 			$value = $column['options']['rawData'];
 		} elseif (!empty($column['value_path'])) {
-			$value = Hash::get($data, $column['value_path']);
+			if (is_array($column['value_path'])) {
+				$value = array();
+				foreach($column['value_path'] as $valuePath) {
+					$value[$valuePath] = Hash::get($data, $valuePath);
+				}
+
+				if (count($value) == 1) {
+					$value = array_shift($value);
+				}
+			} else {
+				$value = Hash::get($data, $column['value_path']);
+			}
 		}
+
 		//Generate the correct column data
 		switch($column['options']['type']) {
 			case 'checkbox':
@@ -413,6 +426,8 @@ class DataGridHelper extends AppHelper {
 			case 'date':
 			case 'time':
 				return $this->__datetimeColumnData($value, $column);
+			case 'user_defined':
+				return $this->__userDefinedColumnData($value?:$data, $column);
 			case 'link':
 				$label = $value;
 
@@ -631,8 +646,8 @@ class DataGridHelper extends AppHelper {
  *
  * Show a formatted date
  *
- * @param  array $data Data record
- * @param  array $column Column options
+ * @param  Array $data Data record
+ * @param  Array $column Column options
  * @return String The formatted date
  */
 	private function __datetimeColumnData($data, $column) {
@@ -666,6 +681,27 @@ class DataGridHelper extends AppHelper {
  */
 	private function __isValidTimestamp($timestamp) {
 		return (is_numeric($timestamp) && (int)$timestamp === $timestamp);
+	}
+
+/**
+ * Generate a column with data processed by a user defined callback function
+ * ---
+ *
+ * Apply a user defined callback function on the supplied data and return the result
+ * 
+ * @param  Array|String $data Data record
+ * @param  Array $column Column options
+ * @return String The result of the callback function
+ */
+	private function __userDefinedColumnData($data, $column) {
+
+		if (array_key_exists('callback', $column['options'])) {
+			$function = $column['options']['callback'];
+
+			return $function($data);
+		}
+
+		return $data;
 	}
 
 /**

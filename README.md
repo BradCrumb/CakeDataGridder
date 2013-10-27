@@ -93,7 +93,7 @@ $this->DataGrid->addColumn('Active', 'User.active', array(
 ));
 ```
 
-### Datetime column
+#### Datetime column
 A datetime column formats a datetime or a timestamp to a specified format and optionally a locale.
 The format can be defined according to http://www.php.net/manual/en/function.date.php
 
@@ -106,6 +106,58 @@ $this->DataGrid->addColumn(
 		'type' => 'datetime',
 		'format' => '%A %e %B %Y',
 		'locale' => 'nl_NL.UTF8', // Optional
+	)
+);
+```
+
+#### Column with a user defined callback function
+One or more examples to show the possibilities
+
+```php
+$this->DataGrid->addColumn(
+	'Example A',
+	array('User.first_name'),
+	array(
+		'type' => 'user_defined',
+		'callback' => function ($value) {
+			return strtoupper($value);
+		}
+	)
+);
+```
+```php
+$this->DataGrid->addColumn(
+	'Example B',
+	'User.last_name',
+	array(
+		'type' => 'user_defined',
+		'callback' => function ($value) {
+			return strtoupper($value);
+		}
+	)
+);
+```
+```php
+$this->DataGrid->addColumn(
+	'Example C',
+	null, // Do not supply any columns, so the complete record will be available as a parameter in the callback function
+	array(
+		'type' => 'user_defined',
+		'callback' => function ($data) {
+			return implode(' ', array_filter(array($data['User']['first_name'], $data['User']['last_name'])));
+		}
+	)
+);
+```
+```php
+$this->DataGrid->addColumn(
+	'Example D',
+	array('User.first_name','User.last_name'),
+	array(
+		'type' => 'user_defined',
+		'callback' => function ($data) {
+			return implode(' ', array_filter(array($data['User.first_name'], $data['User.last_name'])));
+		}
 	)
 );
 ```
