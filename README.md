@@ -24,7 +24,7 @@ In your view you can create a simple DataGrid by doing something like this:
 
 ```php
 $this->DataGrid->addColumn('Id', 'User.id');
-$this->DataGrid->addColumn('Id', 'User.username', array('sort' => true));
+$this->DataGrid->addColumn('Username', 'User.username', array('sort' => true));
 
 //Actions column to add actions to the row
 $this->DataGrid->addColumn('Actions', null, array('type' => 'actions'));
@@ -91,6 +91,23 @@ $this->DataGrid->addColumn('Active', 'User.active', array(
 		'icon'				=> 'active' 			//Add the default Icon class and the active class
 	)
 ));
+```
+
+### Datetime column
+A datetime column formats a datetime or a timestamp to a specified format and optionally a locale.
+The format can be defined according to http://www.php.net/manual/en/function.date.php
+
+```php
+$this->DataGrid->addColumn(
+	'Modified',
+	'User.modified',
+	array(
+		'sort' => true,
+		'type' => 'datetime',
+		'format' => '%A %e %B %Y',
+		'locale' => 'nl_NL.UTF8', // Optional
+	)
+);
 ```
 
 #### Actions column

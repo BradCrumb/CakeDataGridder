@@ -406,6 +406,10 @@ class DataGridHelper extends AppHelper {
 				return $this->__imageColumnData($value, $column);
 			case 'conditional':
 				return $this->__conditionalColumnData($data, $column);
+			case 'datetime':
+			case 'date':
+			case 'time':
+				return $this->__datetimeColumnData($value, $column);
 			case 'link':
 				$label = $value;
 
@@ -617,6 +621,49 @@ class DataGridHelper extends AppHelper {
 		$column['options'] = array_replace_recursive($column['options'], $column['options'][$result]);
 
 		return $this->__generateColumnData($data, $column);
+	}
+
+/**
+ * Generate a datetime column
+ * ---
+ *
+ * Show a formatted date 
+ * 
+ * @param  array $data Data record
+ * @param  array $column Column options
+ * @return String The formatted date
+ */
+	private function __datetimeColumnData($data, $column) {
+		App::uses('CakeTime', 'Utility');
+
+		if (array_key_exists('locale', $column['options'])) {
+			setlocale(LC_TIME, $column['options']['locale']);
+		}
+
+		if (array_key_exists('format', $column['options'])) {
+			if (!$this->__isValidTimestamp($data)) {
+				$data = strtotime($data);
+			}
+
+			return CakeTime::format($data, $column['options']['format']);
+		}
+
+		return $data;
+	}
+
+/**
+ * Check for timestamp
+ * ---
+ *
+ * Check whether the given string is a timestamp
+ *
+ * @todo what checks should be used to determine if a string is a timestamp
+ * 
+ * @param  String $timestamp
+ * @return Boolean
+ */
+	private function __isValidTimestamp($timestamp) {
+		return (is_numeric($timestamp) && (int)$timestamp === $timestamp);
 	}
 
 /**
