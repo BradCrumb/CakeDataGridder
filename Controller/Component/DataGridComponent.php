@@ -34,6 +34,18 @@ class DataGridComponent extends PaginatorComponent {
 	private $__sessionName;
 
 /**
+ * Default settings for Paginator
+ *
+ * @var array
+ */
+	public $defaultSettings = array(
+		'page' => 1,
+		'limit' => 10,
+		'maxLimit' => 100,
+		'paramType' => 'named'
+	);
+
+/**
  * Initialize the component
  * ---
  *
@@ -135,12 +147,12 @@ class DataGridComponent extends PaginatorComponent {
  * @throws NotFoundException
  */
 	public function paginate($object = null, $scope = array(), $whitelist = array()) {
-		$settings = $this->settings;
+		$this->settings = array_merge($this->defaultSettings, $this->settings);
 		if ($this->Session->check("{$this->__sessionName}.settings")) {
-			$settings = array_merge($this->Session->read("{$this->__sessionName}.settings"), $settings);
+			$this->settings = array_merge($this->Session->read("{$this->__sessionName}.settings"), $this->settings);
 		}
 
-		$this->Session->write("{$this->__sessionName}.settings", $settings);
+		$this->Session->write("{$this->__sessionName}.settings", $this->settings);
 
 		if (!$this->Session->check("{$this->__sessionName}.options.limit") && isset($this->settings['limit'])) {
 			$this->Session->write("{$this->__sessionName}.options.limit", $this->settings['limit']);

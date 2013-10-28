@@ -92,13 +92,13 @@ class DataGridHelper extends AppHelper {
 				'separator' => ''
 			),
 			'prev' => array(					//Default settings for prev btn
-				'title' => '<< Previous',
+				'title' => null,
 				'options' => array(
 					'tag' => 'li'
 				)
 			),
 			'next' => array(					//Default settings for next btn
-				'title' => 'Next >>',
+				'title' => null,
 				'options' => array(
 					'tag' => 'li',
 				)
@@ -131,6 +131,8 @@ class DataGridHelper extends AppHelper {
 		parent::__construct($View, $settings);
 
 		$this->__defaults['noResultsMessage'] = __('No results');
+		$this->__defaults['pagination']['prev']['title'] = __('<< Previous');
+		$this->__defaults['pagination']['next']['title'] = __('Next >>');
 
 		//Merge given options with the default
 		$this->__defaults = array_replace_recursive($this->__defaults, $settings);
@@ -685,7 +687,7 @@ class DataGridHelper extends AppHelper {
  * ---
  *
  * Apply a user defined callback function on the supplied data and return the result
- * 
+ *
  * @param  Array|String $data Data record
  * @param  Array $column Column options
  * @return String The result of the callback function
