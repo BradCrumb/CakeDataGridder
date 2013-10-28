@@ -211,7 +211,7 @@ class DataGridHelper extends AppHelper {
  * @param String  $name Name of the action
  * @param array   $url Base Url of the action
  * @param array   $trailingParams Trailing parameters of the URL, with Hash::get the correct value will be retreived
- * @param array   $options Extra options to the action link
+ * @param array   $options Extra options to the action link. A special options is the visibleCondition option, this is a callback where to can deside when the button shows up by returning true or false
  * @param boolean $confirmMessage Confirm message
  *
  * @return String Slug of the added action
@@ -391,7 +391,7 @@ class DataGridHelper extends AppHelper {
 		} elseif (!empty($column['value_path'])) {
 			if (is_array($column['value_path'])) {
 				$value = array();
-				foreach($column['value_path'] as $valuePath) {
+				foreach ($column['value_path'] as $valuePath) {
 					$value[$valuePath] = Hash::get($data, $valuePath);
 				}
 
@@ -544,6 +544,12 @@ class DataGridHelper extends AppHelper {
 	private function __actionsColumnData($data) {
 		$actions = array();
 		foreach ($this->__actions as $action) {
+			//Check the visible condition callback and continue
+			if (isset($action['options']['visibleCondition']) && !$action['options']['visibleCondition']($data)) {
+				continue;
+			}
+			unset($action['options']['visibleCondition']);
+
 			$trailingParams = array();
 			if (!empty($action['trailingParams'])) {
 				foreach ($action['trailingParams'] as $key => $param) {
@@ -687,7 +693,6 @@ class DataGridHelper extends AppHelper {
  * @return String The result of the callback function
  */
 	private function __userDefinedColumnData($data, $column) {
-
 		if (array_key_exists('callback', $column['options'])) {
 			$function = $column['options']['callback'];
 
