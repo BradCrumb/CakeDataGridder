@@ -272,3 +272,9 @@ $this->DataGrid->addFilter($fieldName, $options);
 ```
 
 The filter submits to the same URL. You have to implement the filter yourself in the Controller. When AJAX is enabled, the submit will be done threw AJAX.
+
+### Component
+The plugin also provides a Component which extends the PaginatorComponent, but with some extras.
+
+* Saves pagination options to the Session so the state of the grid is saved
+* Saves filter options of the pagination to the Session so also filtering is saved
