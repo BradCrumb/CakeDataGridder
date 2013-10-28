@@ -148,22 +148,16 @@ class DataGridHelper extends AppHelper {
  * @param String $label Label for the column
  * @param String $valuePath The path of the value to search for inside the array: Hash::get compatible
  * @param array  $options Column options
- *
- * @return String Slug of the column
  */
 	public function addColumn($label, $valuePath, array $options = array()) {
 		//Merge given options with the default
 		$options = array_replace_recursive($this->__defaults['column'], $options);
 
-		$slug = Inflector::slug($label);
-
-		$this->__columns[$slug] = array(
+		$this->__columns[] = array(
 			'label' => $label,
 			'value_path' => $valuePath,
 			'options' => $options
 		);
-
-		return $slug;
 	}
 
 /**
