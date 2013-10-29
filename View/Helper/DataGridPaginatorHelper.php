@@ -43,12 +43,4 @@ class DataGridPaginatorHelper extends PaginatorHelper {
 		}
 		return parent::url($url);
 	}
-
-	public function numbers($options = array()) {
-		if ($options === false) {
-			return '';
-		}
-
-		return parent::numbers($options);
-	}
 }
