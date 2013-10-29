@@ -351,6 +351,17 @@ $this->DataGrid->defaults(array(
 ));
 ```
 
+### Row actions
+By setting a row action, an alternative action can be specified when a table row is clicked.
+
+```php
+$this->DataGrid->addRowAction(array(
+	'action' => 'view'
+), array(
+	'User.id'
+), $options);
+```
+
 ### Filters
 It is possible to add a search filter to filter the datagrid. The API is the same as the $this->Form->input() method.
 
