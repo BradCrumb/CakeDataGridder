@@ -1,4 +1,4 @@
-<tr data-depth="<?php echo $rowData['depth'];?>">
+<tr data-depth="<?php echo $rowData['depth'];?>"<?php if (isset($rowData['action'])) { ?> data-action="<?php echo $rowData['action'];?>"<?php } ?>>
 	<?php
 	foreach ($rowData['columns'] as $columnData) {
 		?>

@@ -16,7 +16,7 @@ class DataGridHelper extends AppHelper {
  *
  * @var array
  */
-	public $helpers = array('Html', 'DataGridder.DataGridPaginator', 'ImageCropResize.Image', 'Form');
+	public $helpers = array('Html', 'DataGridder.DataGridPaginator', 'ImageCropResize.Image', 'Form', 'Text');
 
 /**
  * All the columns to render
@@ -54,6 +54,13 @@ class DataGridHelper extends AppHelper {
 	private $__pluginName = null;
 
 /**
+ * The row action
+ *
+ * @var array
+ */
+	private $__rowAction = null;
+
+/**
  * Default settings of the helper
  *
  * @var array
@@ -71,6 +78,7 @@ class DataGridHelper extends AppHelper {
 			'indentSize'		=> 2,			//Indent size for nested grids
 			'rawData'			=> false,		//Place this data one on one inside the field instead of searching for data
 			'escape'			=> false,		//HTML escape retrieved data
+			'autoLink'			=> false,		//Automatically create hyperlinks for URLs and e-mail addresses
 			'filter'			=> array(
 				'label'			=> '&or;',
 				'htmlAttributes' => array(
@@ -118,6 +126,11 @@ class DataGridHelper extends AppHelper {
 			'submit' => array(),				//Settings for submit
 			'element' => null,					//Custom element to render, instead of default
 			'options' => array()
+		),
+		'action' => array(						//Default settings for actions
+			'options' => array(
+				'type' => 'link',				//Type of action link: can be 'link' or 'image'
+			)
 		),
 		'noResultsMessage' => null				//The default can be found in the constructor because we have to translate the text
 	);
@@ -218,6 +231,8 @@ class DataGridHelper extends AppHelper {
  * @return String Slug of the added action
  */
 	public function addAction($name, array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
+		$options = array_replace_recursive($this->__defaults['action']['options'], $options);
+
 		$slug = Inflector::slug($name);
 
 		$this->__actions[$slug] = array(
@@ -229,6 +244,29 @@ class DataGridHelper extends AppHelper {
 		);
 
 		return $slug;
+	}
+
+/**
+ * Set the row action of the Grid
+ * ---
+ *
+ * This method sets the row action of the datagrid. This action can be value dependent and can contain a confirm message.
+ * Setting a row action will override the possibility of expanding a collapsed row by clicking on it.
+ *
+ * @param array   $url Base Url of the action
+ * @param array   $trailingParams Trailing parameters of the URL, with Hash::get the correct value will be retrieved
+ * @param array   $options Extra options to the action link
+ * @param boolean $confirmMessage Confirm message
+ */
+	public function setRowAction(array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
+		$options = array_replace_recursive($this->__defaults['action']['options'], $options);
+
+		$this->__rowAction = array(
+			'url' => $url,
+			'trailingParams' => $trailingParams,
+			'options' => $options,
+			'confirmMessage' => $confirmMessage
+		);
 	}
 
 /**
@@ -336,6 +374,19 @@ class DataGridHelper extends AppHelper {
 			'columns' => array(),
 			'depth' => $depth
 		);
+
+		if (isset($this->__rowAction)) {
+			
+			$trailingParams = array();
+			if (!empty($this->__rowAction['trailingParams'])) {
+				foreach ($this->__rowAction['trailingParams'] as $key => $param) {
+					$trailingParams[$key] = Hash::get($data, $param);
+				}
+			}
+
+			$rowData['action'] = $this->Html->url($this->__rowAction['url'] + $trailingParams);
+		}
+
 		foreach ($this->__columns as $column) {
 			$rowData['columns'][] = array(
 				'text' => $this->__generateColumnData($data, $column),
@@ -491,7 +542,7 @@ class DataGridHelper extends AppHelper {
 
 			$value = $this->Html->link($value, $url, array('escape' => !empty($column['options']['escape'])));
 		} else {
-			$value = h($value);
+			$value = (empty($column['options']['autoLink']) ? (empty($column['options']['escape']) ? $value : h($value)) : $this->Text->autoLink($value));
 		}
 
 		return $value;
@@ -712,7 +763,7 @@ class DataGridHelper extends AppHelper {
 		return $data;
 	}
 
-/*
+/**
  * Generate a Formatted column
  * ---
  *
