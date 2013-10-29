@@ -54,11 +54,12 @@ $this->DataGrid->addColumn($label, $valuePath, $options);
 ```
 
 #### String column
-The String column is the default type of column. It simply retrieves the value of the array and places it inside the column. No extra functionalities.
+The String column is the default type of column. It retrieves the value of the array and places it inside the column. Optionally any URLs or e-mail addresses can be autolinked by enabling the `autoLink` column option.
 
 ```php
 $options = array(
-	'type' => 'string'
+	'type'		=> 'string',
+	'autoLink'	=> false
 );
 ```
 
@@ -182,6 +183,18 @@ $this->DataGrid->addAction('Delete', array(
 	'User.id'
 ), $options);
 ```
+
+By setting the `type` option for an action to 'image' and the `image` option to the URL to an image file, it is possible to create image links for actions:
+
+```php
+$this->DataGrid->addAction('Delete', array(
+	'action' => 'delete'
+), array(
+	'User.id'
+), array(`type` => `image`, `image` => $this->Html->url('/img/image.jpg')));
+```
+
+By default a link will be generated (`type` = 'link').
 
 #### Conditional column
 With the Conditional column it is possible to show a value according to 1 or more conditions.
@@ -319,6 +332,7 @@ $this->DataGrid->defaults(array(
 		'indentSize'		=> 2,			//Indent size for nested grids
 		'rawData'			=> false		//Place this data one on one inside the field instead of searching for data
 		'escape'			=> false		//HTML escape retrieved data
+		'autoLink'			=> false		//Automatically create hyperlinks for URLs and e-mail addresses
 	),
 	'grid'			=> array(				//Default grid settings
 		'class' => 'data_grid'				//Class for datagrid
@@ -328,7 +342,12 @@ $this->DataGrid->defaults(array(
 	),
 	'filter'		=> array(				//Default settings for filters
 		'submit' => array()					//Settings for submit
-	)
+	),
+	'action' => array(						//Default settings for actions
+		'options' => array(
+			'type' => 'link'				//Type of action link: can be 'link' or 'image'
+		)
+	),
 ));
 ```
 
