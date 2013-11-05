@@ -16,7 +16,7 @@ class DataGridHelper extends AppHelper {
  *
  * @var array
  */
-	public $helpers = array('Html', 'DataGridder.DataGridPaginator', 'ImageCropResize.Image', 'Form', 'Text');
+	public $helpers = array('Html', 'DataGridder.DataGridPaginator', 'ImageCropResize.Image', 'Form');
 
 /**
  * All the columns to render
@@ -54,13 +54,6 @@ class DataGridHelper extends AppHelper {
 	private $__pluginName = null;
 
 /**
- * The row action
- *
- * @var array
- */
-	private $__rowAction = null;
-
-/**
  * Default settings of the helper
  *
  * @var array
@@ -78,8 +71,6 @@ class DataGridHelper extends AppHelper {
 			'indentOnThread'	=> false,		//Indent on threaded data
 			'indentSize'		=> 2,			//Indent size for nested grids
 			'rawData'			=> false,		//Place this data one on one inside the field instead of searching for data
-			'escape'			=> false,		//HTML escape retrieved data
-			'autoLink'			=> false,		//Automatically create hyperlinks for URLs and e-mail addresses
 			'filter'			=> array(
 				'label'			=> '&or;',
 				'htmlAttributes' => array(
@@ -128,12 +119,8 @@ class DataGridHelper extends AppHelper {
 			'element' => null,					//Custom element to render, instead of default
 			'options' => array()
 		),
-		'action' => array(						//Default settings for actions
-			'options' => array(
-				'type' => 'link',				//Type of action link: can be 'link' or 'image'
-			)
-		),
-		'noResultsMessage' => null				//The default can be found in the constructor because we have to translate the text
+		'noResultsMessage' => null,				//The default can be found in the constructor because we have to translate the text
+		'model' => null
 	);
 
 /**
@@ -232,8 +219,6 @@ class DataGridHelper extends AppHelper {
  * @return String Slug of the added action
  */
 	public function addAction($name, array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
-		$options = array_replace_recursive($this->__defaults['action']['options'], $options);
-
 		$slug = Inflector::slug($name);
 
 		$this->__actions[$slug] = array(
@@ -245,29 +230,6 @@ class DataGridHelper extends AppHelper {
 		);
 
 		return $slug;
-	}
-
-/**
- * Set the row action of the Grid
- * ---
- *
- * This method sets the row action of the datagrid. This action can be value dependent and can contain a confirm message.
- * Setting a row action will override the possibility of expanding a collapsed row by clicking on it.
- *
- * @param array   $url Base Url of the action
- * @param array   $trailingParams Trailing parameters of the URL, with Hash::get the correct value will be retrieved
- * @param array   $options Extra options to the action link
- * @param boolean $confirmMessage Confirm message
- */
-	public function setRowAction(array $url, array $trailingParams = array(), array $options = array(), $confirmMessage = false) {
-		$options = array_replace_recursive($this->__defaults['action']['options'], $options);
-
-		$this->__rowAction = array(
-			'url' => $url,
-			'trailingParams' => $trailingParams,
-			'options' => $options,
-			'confirmMessage' => $confirmMessage
-		);
 	}
 
 /**
@@ -321,7 +283,8 @@ class DataGridHelper extends AppHelper {
 		$element = isset($options['element']) ? $options['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'headers';
 
 		return $this->_View->element($element, array(
-			'headers' => $columns
+			'headers' => $columns,
+			'model' => $this->__defaults['model']
 		));
 	}
 
@@ -375,19 +338,6 @@ class DataGridHelper extends AppHelper {
 			'columns' => array(),
 			'depth' => $depth
 		);
-
-		if (isset($this->__rowAction)) {
-			
-			$trailingParams = array();
-			if (!empty($this->__rowAction['trailingParams'])) {
-				foreach ($this->__rowAction['trailingParams'] as $key => $param) {
-					$trailingParams[$key] = Hash::get($data, $param);
-				}
-			}
-
-			$rowData['action'] = $this->Html->url($this->__rowAction['url'] + $trailingParams);
-		}
-
 		foreach ($this->__columns as $column) {
 			$rowData['columns'][] = array(
 				'text' => $this->__generateColumnData($data, $column),
@@ -429,7 +379,7 @@ class DataGridHelper extends AppHelper {
  * Generate a data column
  * ---
  *
- * This method generates a data column according to it's type. The types are (switcher, actions, image, conditional, link, formatted, string)
+ * This method generates a data column according to it's type. The types are (switcher, actions, image, conditional, link, string)
  *
  * @param array $data Data record
  * @param array $column The column to generate
@@ -480,9 +430,7 @@ class DataGridHelper extends AppHelper {
 				if (is_array($label)) {
 					$label = Router::url($value);
 				}
-				return $this->Html->link($label, $value, array('escape' => !empty($column['options']['escape'])));
-			case 'formatted':
-				return $this->__formattedColumnData($data, $column);
+				return $this->Html->link($label, $value);
 			case 'string':
 			default:
 				return $this->__stringColumnData($value, $data, $column);
@@ -505,8 +453,7 @@ class DataGridHelper extends AppHelper {
 		if (array_key_exists('name', $column['options'])) {
 			$name = trim($column['options']['name']);
 			if (array_key_exists('replacement', $column['options']) && stripos($name, 'pattern')) {
-				$rawValue = $data[$column['options']['replacement']];
-				$name = preg_replace('/#pattern#/i', (!empty($column['options']['escape']) ? h($rawValue) : $rawValue), $name);
+				$name = preg_replace('/#pattern#/i', $data[$column['options']['replacement']], $name);
 			}
 		} else {
 			return null;
@@ -541,9 +488,7 @@ class DataGridHelper extends AppHelper {
 				$url = $url + $trailingParams;
 			}
 
-			$value = $this->Html->link($value, $url, array('escape' => !empty($column['options']['escape'])));
-		} else {
-			$value = (empty($column['options']['autoLink']) ? (empty($column['options']['escape']) ? $value : h($value)) : $this->Text->autoLink($value));
+			$value = $this->Html->link($value, $url);
 		}
 
 		return $value;
@@ -625,11 +570,7 @@ class DataGridHelper extends AppHelper {
 
 				$action['options']['data-confirm_message'] = $action['confirmMessage'];
 
-				if (isset($action['options']['class'])) {
-					$action['options']['class'] .= ' confirm_message';
-				} else {
-					$action['options']['class'] = 'confirm_message';
-				}
+				$action['options']['class'] .= ' confirm_message';
 			}
 
 			$actions[] = array(
@@ -765,92 +706,6 @@ class DataGridHelper extends AppHelper {
 	}
 
 /**
- * Generate a Formatted column
- * ---
- *
- * With the Formatted column it is possible to show one or more sprintf() formatted values.
- *
- * @author Henno Schooljan <github@sfynx.nl>
- *
- * @param array $data Data record
- * @param array $column Column options
- *
- * @return String The generated formatted column
- *
- * @throws CakeException
- */
-	private function __formattedColumnData($data, $column) {
-		//We need a format string
-		if (!isset($column['options']['formatString'])) {
-			throw new CakeException(__('No format string specified'));
-		}
-
-		//Get values
-		if (empty($column['options']['valuePath'])) {
-			if (empty($column['value_path'])) {
-				throw new CakeException(__('No value path(s) specified'));
-			}
-			$valuePaths = array($column['value_path']);
-		} else {
-			$valuePaths = (is_array($column['options']['valuePath']) ? $column['options']['valuePath'] : array($column['options']['valuePath']));
-		}
-
-		$values = array();
-		foreach($valuePaths as $valuePath) {
-			$rawValue = Hash::get($data, $valuePath);
-			$values[] = (!empty($column['options']['escape']) ? h($rawValue) : $rawValue);
-		}
-
-		//Get span classes if present
-		$classes = null;
-		if (!empty($column['options']['span'])) {
-
-			//Infer span class name(s() from value paths if the span option is Boolean true, else use supplied name(s).
-			if ($column['options']['span'] === true) {
-				$classes = str_replace('.', '_', $valuePaths);
-			} elseif (is_array($column['options']['span'])) {
-				$classes = $column['options']['span'];
-			} else {
-				$classes = array($column['options']['span']);
-			}
-		}
-
-		//Examine the format string, making sure we have an equivalent amount of values to fill in.
-		//Based on MelTraX's regular expression (http://www.php.net/manual/en/function.sprintf.php#86835)
-		$formatRegExp = '(?:%(?:[0-9]+\$)?[+-]?(?:[ 0]|\'.)?-?[0-9]*(?:\.[0-9]+)?[bcdeufFosxX])';
-
-		if (preg_match_all('/'.$formatRegExp.'/', $column['options']['formatString'], $formatMatches, PREG_OFFSET_CAPTURE) === false) {
-			throw new CakeException(__('Could not extract format string parameters'));
-		}
-
-		$amountValues = count($values);	//Store amount of values, we will use it again later
-		if (count($formatMatches[0]) != $amountValues) {
-			throw new CakeException(__('Amounts of value paths and format string parameters do not match'));
-		}
-
-		//If we have span classes, we should do extra processing of the format string
-		if (!is_null($classes)) {
-			if ($amountValues != count($classes)) {
-				throw new CakeException(__('Amounts of value paths and classes do not match'));
-			}
-
-			//Extract all parts of the format string including the parameters
-			$formatResults = array();
-			foreach(preg_split('/('.$formatRegExp.')/', $column['options']['formatString'], null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE) as $part) {
-				$formatResults[$part[1]] = $part[0];
-			}
-
-			for($i = 0; $i < $amountValues; $i++) {
-				$formatResults[$formatMatches[0][$i][1]] = $this->Html->tag('span', $formatMatches[0][$i][0], array('class' => $classes[$i]));
-			}
-
-			$column['options']['formatString'] = implode($formatResults);
-		}
-
-		return vsprintf($column['options']['formatString'], $values);
-	}
-
-/**
  * Generate the DataGrid
  * ---
  *
@@ -897,14 +752,16 @@ class DataGridHelper extends AppHelper {
 
 		unset($options['limit']);
 
-		if ($this->DataGridPaginator->hasPage(2)) {
+		$extraOptions = array('model' => $this->__defaults['model']);
+
+		if ($this->DataGridPaginator->hasPage($this->__defaults['model'], 2)) {
 			$prevDisabledOptions = $options['prev']['options'];
 			$prevDisabledOptions['class'] = 'prev disabled';
 			$nextDisabledOptions = $options['next']['options'];
 			$nextDisabledOptions['class'] = 'next disabled';
-			$prev = $this->DataGridPaginator->prev($options['prev']['title'], $options['prev']['options'], null, $prevDisabledOptions);
-			$numbers = $this->DataGridPaginator->numbers($options['numbers']);
-			$next = $this->DataGridPaginator->next($options['next']['title'], $options['next']['options'], null, $nextDisabledOptions);
+			$prev = $this->DataGridPaginator->prev($options['prev']['title'], array_merge($options['prev']['options'], $extraOptions), null, $prevDisabledOptions);
+			$numbers = $this->DataGridPaginator->numbers(array_merge($options['numbers'], $extraOptions));
+			$next = $this->DataGridPaginator->next($options['next']['title'], array_merge($options['next']['options'], $extraOptions), null, $nextDisabledOptions);
 			return $options['before'] . $prev . $numbers . $next . $options['after'];
 		} else {
 			return '';

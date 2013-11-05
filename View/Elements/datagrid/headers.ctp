@@ -5,7 +5,7 @@
 		<th <?php echo $header['options']['header'];?>>
 			<?php
 			$sortKey = isset($header['options']['sort_key']) ? $header['options']['sort_key'] : $header['value_path'];
-			echo $header['options']['sort'] && $this->Paginator->hasPage(1) ? $this->Paginator->sort($sortKey, $header['label'], array('class' => 'sort')) : $header['label'] ?>
+			echo $header['options']['sort'] && $this->Paginator->hasPage(1) ? $this->Paginator->sort($sortKey, $header['label'], array('class' => 'sort', 'model' => $model)) : $header['label'] ?>
 
 			<?php
 			if (isset($header['options']['filter']['options']) && !empty($header['options']['filter']['options'])) {
