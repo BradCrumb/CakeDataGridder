@@ -12,8 +12,8 @@ DataGrid = (function() {
 		this.selector = selector;
 		this.element = $(selector);
 		this.body = $('body');
-		// Nodenames of elements that should be clickable in a table row
-		this.enabledElements = ['a', 'input'];
+		// jQuery selector of elements that should be clickable in a table row
+		this.enabledElements = 'input, a, a img';
 
 		this.addEvents();
 	}
@@ -105,6 +105,18 @@ DataGrid = (function() {
 				});
 			});
 		},
+		__addRowActionEvent: function() {
+			var that = this;
+			this.body.on('click', this.selector + ' tr[data-action]', function(ev) {
+				if ($(ev.target).is(that.enabledElements)) {
+					return;
+				}
+				
+				ev.preventDefault();
+
+				window.location = ($(this).data('action'));
+			});
+		},
 		__addConfirmEvent: function() {
 			this.body.on('click', this.selector + ' .confirm_message', function() {
 				return confirm($(this).data('confirm_message'));
@@ -125,7 +137,7 @@ DataGrid = (function() {
 
 			var that = this;
 			this.body.on('click', this.selector + ' tr[data-depth]', function(ev) {
-				if(-1 == $.inArray(ev.target.nodeName.toLowerCase(), that.enabledElements)) {
+				if(!$(ev.target).is(that.enabledElements)) {
 					ev.preventDefault();
 
 					that.__rowExpandToggle($(this));
@@ -219,6 +231,7 @@ DataGrid = (function() {
 			this.__addGridColumnFilter();
 
 			this.__addConfirmEvent();
+			this.__addRowActionEvent();
 			this.__addExpandRowEvent();
 
 			this.__addLimitEvent();

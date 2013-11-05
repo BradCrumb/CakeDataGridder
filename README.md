@@ -54,11 +54,12 @@ $this->DataGrid->addColumn($label, $valuePath, $options);
 ```
 
 #### String column
-The String column is the default type of column. It simply retrieves the value of the array and places it inside the column. No extra functionalities.
+The String column is the default type of column. It retrieves the value of the array and places it inside the column. Optionally any URLs or e-mail addresses can be autolinked by enabling the `autoLink` column option.
 
 ```php
 $options = array(
-	'type' => 'string'
+	'type'		=> 'string',
+	'autoLink'	=> false
 );
 ```
 
@@ -183,6 +184,18 @@ $this->DataGrid->addAction('Delete', array(
 ), $options);
 ```
 
+By setting the `type` option for an action to 'image' and the `image` option to the URL to an image file, it is possible to create image links for actions:
+
+```php
+$this->DataGrid->addAction('Delete', array(
+	'action' => 'delete'
+), array(
+	'User.id'
+), array(`type` => `image`, `image` => $this->Html->url('/img/image.jpg')));
+```
+
+By default a link will be generated (`type` = 'link').
+
 #### Conditional column
 With the Conditional column it is possible to show a value according to 1 or more conditions.
 
@@ -211,6 +224,73 @@ $this->DataGrid->addColumn('Active', 'User.active', array(
 ```
 
 You can see dat you can create conditions with as result a new column. So it is also possible to nest conditions. Simply use type `conditional` again, with `true` or `false`.
+
+#### Formatted column
+The Formatted column type displays one or more values in a specific string format using sprintf() formatting.
+
+The simplest form just uses one value:
+
+```php
+$this->DataGrid->addColumn('Name', 'User.last_name', array(
+	'type'			=> 'formatted',
+	'formatString'	=> 'My name is %s.'
+));
+```
+
+We can also display an alternative value. The following example will display the user's account balance, while still using the last name for other functionality such as sorting:
+
+```php
+$this->DataGrid->addColumn('Account Balance', 'User.last_name', array(
+	'type'			=> 'formatted',
+	'formatString'	=> 'Account balance: $ %.2f',
+	'valuePath'		=> 'User.account_balance'
+));
+```
+
+Multiple values can be displayed by using multiple substitution patterns and supplying the value paths as an array:
+
+```php
+$this->DataGrid->addColumn('Name', 'User.last_name', array(
+	'type'			=> 'formatted',
+	'formatString'	=> 'My full name is %s %s, but we sort on last name.',
+	'valuePath'		=> array('User.first_name', 'User.last_name')
+));
+```
+
+It is possible to wrap the different formatted elements in HTML span tags for styling purposes by enabling the `span` option:
+
+```php
+$this->DataGrid->addColumn('Last Name', 'User.last_name', array(
+	'type'			=> 'formatted',
+	'formatString'	=> 'My last name is %s.',
+	'span'			=> true
+));
+```
+
+If we are called John Doe, this will result in the following output:
+
+```html
+My last name is <span class="User_last_name">Doe</span>.
+```
+
+The class names can be customized by explicitly providing them in the `span` option as a string (1 value) or as an array (multiple values):
+
+```php
+$this->DataGrid->addColumn('Name', 'User.last_name', array(
+	'type'			=> 'formatted',
+	'formatString'	=> 'My full name is %s %s, but we sort on last name.',
+	'valuePath'		=> array('User.first_name', 'User.last_name'),
+	'span'			=> array('first_name', 'last_name')
+));
+```
+
+If we are called John Doe, this will result in the following output:
+
+```html
+My full name is <span class="first_name">John</span> <span class="last_name">Doe</span>, but we sort on last name.
+```
+
+The `span` option is set to `false` by default.
 
 #### Add multiple columns in one call
 It is also possible to add multiple columns in one method call. The `addColumns` method can be used.
@@ -251,6 +331,8 @@ $this->DataGrid->defaults(array(
 		'indentOnThread'	=> false,		//Indent on threaded data
 		'indentSize'		=> 2,			//Indent size for nested grids
 		'rawData'			=> false		//Place this data one on one inside the field instead of searching for data
+		'escape'			=> false		//HTML escape retrieved data
+		'autoLink'			=> false		//Automatically create hyperlinks for URLs and e-mail addresses
 	),
 	'grid'			=> array(				//Default grid settings
 		'class' => 'data_grid'				//Class for datagrid
@@ -260,8 +342,24 @@ $this->DataGrid->defaults(array(
 	),
 	'filter'		=> array(				//Default settings for filters
 		'submit' => array()					//Settings for submit
-	)
+	),
+	'action' => array(						//Default settings for actions
+		'options' => array(
+			'type' => 'link'				//Type of action link: can be 'link' or 'image'
+		)
+	),
 ));
+```
+
+### Row actions
+By setting a row action, an alternative action can be specified when a table row is clicked.
+
+```php
+$this->DataGrid->addRowAction(array(
+	'action' => 'view'
+), array(
+	'User.id'
+), $options);
 ```
 
 ### Filters
