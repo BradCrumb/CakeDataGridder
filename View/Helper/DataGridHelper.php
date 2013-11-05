@@ -63,6 +63,7 @@ class DataGridHelper extends AppHelper {
 		'update' => '#content',					//Conainer to update when we do an AJAX request
 		'column' => array(						//Default settings for columns
 			'sort'				=> false,		//Sorting on or off
+			'sortKey'			=> null,		//Key for Paginator::sort, defaults to value_path
 			'type'				=> 'string',	//Type of the column
 			'htmlAttributes'	=> array(),		//Other HTML attributes
 			'header'			=> false,		//Header settings
