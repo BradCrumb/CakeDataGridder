@@ -225,7 +225,7 @@ class DataGridHelper extends AppHelper {
 			'name' => $name,
 			'url' => $url,
 			'trailingParams' => $trailingParams,
-			'options' => $options,
+			'options' => array_merge(array('type' => 'link'), $options),
 			'confirmMessage' => $confirmMessage
 		);
 
