@@ -139,7 +139,7 @@ class DataGridHelper extends AppHelper {
 		//Merge given options with the default
 		$this->__defaults = array_replace_recursive($this->__defaults, $settings);
 
-		$explode = explode('/', realpath(__DIR__ . DS . '..' . DS . '..'));
+		$explode = explode(DS, realpath(__DIR__ . DS . '..' . DS . '..'));
 		$this->__pluginName = end($explode);
 	}
 
@@ -752,7 +752,7 @@ class DataGridHelper extends AppHelper {
 
 		unset($options['limit']);
 
-		$extraOptions = array('model' => $this->__defaults['model']);
+		$extraOptions = array('model' => $this->__defaults['model'], 'url' => array('model' => $this->__defaults['model']));
 
 		if ($this->DataGridPaginator->hasPage($this->__defaults['model'], 2)) {
 			$prevDisabledOptions = $options['prev']['options'];
