@@ -5,8 +5,22 @@
 		<th <?php echo $header['options']['header'];?>>
 			<?php
 			$sortKey = isset($header['options']['sort_key']) ? $header['options']['sort_key'] : $header['value_path'];
-			echo $header['options']['sort'] && $this->Paginator->hasPage(1) ? $this->Paginator->sort($sortKey, $header['label'], array('class' => 'sort', 'model' => $model)) : $header['label'] ?>
+			
+			if ($header['options']['type'] != 'actions' && (bool)$header['options']['sort'] && $this->Paginator->hasPage(1)) {
+				$directionClass = 'sort';
 
+				foreach($paging as $pModel => $pOptions) {
+					// This allows the setting of a default direction class, otherwise the paginator is not supplying that
+					if (array_key_exists('order', $pOptions) && array_key_exists($sortKey, $pOptions['order'])) {
+						$directionClass .= ' ' . strtolower($pOptions['order'][$sortKey]);
+						break;
+					}
+				}
+
+				echo $this->Paginator->sort($sortKey, $header['label'], array('class' => $directionClass, 'model' => $model));
+			} else {
+				echo $header['label'];
+			}
 			<?php
 			if (isset($header['options']['filter']['options']) && !empty($header['options']['filter']['options'])) {
 				echo $this->Html->link($header['options']['filter']['label'], '#', $header['options']['filter']['htmlAttributes']);
@@ -26,10 +40,7 @@
 					</li>
 					<?php
 					foreach ($header['options']['filter']['options'] as $key => $value) {
-						if (is_array($value)) {
-							debug($value);
-						}
-						?>
+					?>
 						<li <?php
 							if ($header['options']['filter']['active_field'] == $key) {
 								echo 'class="active"';
