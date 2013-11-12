@@ -274,7 +274,7 @@ class DataGridHelper extends AppHelper {
 				$directionClass = 'sort';
 
 				foreach($paging as $pModel => $pOptions) {
-					if (array_key_exists('order', $pOptions) && array_key_exists($sortKey, $pOptions['order'])) {
+					if (array_key_exists('order', $pOptions) && is_array($pOptions['order']) && array_key_exists($sortKey, $pOptions['order'])) {
 						$directionClass .= ' ' . strtolower($pOptions['order'][$sortKey]);
 						break;
 					}
