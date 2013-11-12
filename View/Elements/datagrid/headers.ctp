@@ -21,7 +21,7 @@
 			} else {
 				echo $header['label'];
 			}
-			<?php
+
 			if (isset($header['options']['filter']['options']) && !empty($header['options']['filter']['options'])) {
 				echo $this->Html->link($header['options']['filter']['label'], '#', $header['options']['filter']['htmlAttributes']);
 
