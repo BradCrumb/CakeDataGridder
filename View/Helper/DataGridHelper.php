@@ -813,6 +813,8 @@ class DataGridHelper extends AppHelper {
 
 			if (isset($this->request->query['limit'])) {
 				$attributes['value'] = $this->request->query['limit'];
+			} elseif (isset($this->request->params['named']) && isset($this->request->params['named']['limit'])) {
+				$attributes['value'] = $this->request->params['named']['limit'];
 			}
 			return $this->Form->select('limit', $this->__defaults['pagination']['limit']['options'], $attributes);
 		}
