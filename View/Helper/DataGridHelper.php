@@ -263,8 +263,30 @@ class DataGridHelper extends AppHelper {
 		}
 
 		$columns = $this->__columns;
+		
+		//Get the paging parameters for stuff like ordering
+		$paging = isset($this->params['paging'])? $this->params['paging']: array();
 
 		foreach ($this->__columns as $key => $column) {
+			//Check to see if we have to add some classes to the header for sorting, we don't want those classes if the column is of the type "actions"
+			if ($column['options']['type'] != 'actions' && (bool)$column['options']['sort']) {
+				$sortKey = isset($column['options']['sort_key']) ? $column['options']['sort_key'] : $column['value_path'];
+				$directionClass = 'sort';
+
+				foreach($paging as $pModel => $pOptions) {
+					if (array_key_exists('order', $pOptions) && array_key_exists($sortKey, $pOptions['order'])) {
+						$directionClass .= ' ' . strtolower($pOptions['order'][$sortKey]);
+						break;
+					}
+				}
+
+				if (isset($column['options']['header']['class'])) {
+					$column['options']['header']['class'] .= ' ' . $directionClass;
+				} else {
+					$column['options']['header']['class'] = $directionClass;
+				}
+			}
+
 			if ($column['options']['header']) {
 				$columns[$key]['options']['header'] = $this->_parseAttributes($column['options']['header']);
 			}
@@ -284,7 +306,8 @@ class DataGridHelper extends AppHelper {
 
 		return $this->_View->element($element, array(
 			'headers' => $columns,
-			'model' => $this->__defaults['model']
+			'model' => $this->__defaults['model'],
+			'paging' => $paging,
 		));
 	}
 
