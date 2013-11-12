@@ -748,7 +748,7 @@ class DataGridHelper extends AppHelper {
 		//Load DataGrid javascript
 		$this->script();
 
-		$element = isset($this->__defaults['grid']['element']) ? $this->__defaults['grid']['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'grid';
+		$element = isset($options['grid']['element']) ? $options['grid']['element']: $this->__pluginName . '.' . $this->__elementsDir . DS . 'grid';
 
 		return $this->_View->element($element, array(
 			'header' => $this->header(),
