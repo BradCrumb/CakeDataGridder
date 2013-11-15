@@ -11,7 +11,8 @@
 
 				foreach($paging as $pModel => $pOptions) {
 					// This allows the setting of a default direction class, otherwise the paginator is not supplying that
-					if (array_key_exists('order', $pOptions) && array_key_exists($sortKey, $pOptions['order'])) {
+					if (is_array($pOptions) && array_key_exists('order', $pOptions) && 
+						is_array($pOptions['order']) && array_key_exists($sortKey, $pOptions['order'])) {
 						$directionClass .= ' ' . strtolower($pOptions['order'][$sortKey]);
 						break;
 					}
