@@ -95,7 +95,7 @@ DataGrid = (function() {
 		},
 		__addSortEvent: function() {
 			var that = this;
-			this.body.on('click', this.selector + ' .sort', function(ev) {
+			this.body.on('click', this.selector + ' a.sort', function(ev) {
 				ev.preventDefault();
 
 				$.get($(this).attr('href'), function(data) {
@@ -111,7 +111,7 @@ DataGrid = (function() {
 				if ($(ev.target).is(that.enabledElements)) {
 					return;
 				}
-				
+
 				ev.preventDefault();
 
 				window.location = ($(this).data('action'));
