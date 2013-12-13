@@ -15,7 +15,11 @@ DataGrid = (function() {
 		// jQuery selector of elements that should be clickable in a table row
 		this.enabledElements = 'input, a, a img';
 
+		$.cookie.json = true;
+
 		this.addEvents();
+
+		this.__loadExpandStates();
 	}
 
 	DataGrid.prototype = {
@@ -179,6 +183,96 @@ DataGrid = (function() {
 
 				next = next.next('tr[data-depth]').filter(checkDepth);
 			}
+
+			this.__saveExpandState(el);
+		},
+/**
+ * Save expanded state to a cookie
+ *
+ * @param {DomElement} el Row element
+ *
+ * @return {boolean} If the state is saved to the cookie
+ */
+		__saveExpandState: function(el) {
+			var elId = el.attr('id');
+
+			if (elId) {
+				var expandStates = $.cookie('DataGridder.expand_states');
+
+				if(!expandStates) {
+					expandStates = {};
+				}
+
+				expandStates[elId] = el.hasClass('expanded') ? 'expanded' : 'collapsed';
+
+				$.cookie('DataGridder.expand_states', expandStates);
+
+				return true;
+			}
+
+			return false;
+		},
+/**
+ * Load expand states from cookie
+ *
+ * @return {boolean} If the expand states are loaded
+ */
+		__loadExpandStates: function() {
+			var expandStates = $.cookie('DataGridder.expand_states'),
+				nextDepth,
+				el,
+				next,
+				checkDepth = function() {
+					return $(this).data('depth') >= nextDepth;
+				},
+				isVisible = function(el) {
+					var parents = [],
+						prev = el.prev();
+
+					while(prev.data('depth') > 0) {
+						if(prev.data('depth') < el.data('depth')) {
+							parents.push(prev);
+						}
+
+						prev = prev.prev();
+					}
+					if(prev.data('depth') != el.data('depth')) {
+						parents.push(prev);
+					}
+
+					for(var i=0;i<parents.length;i++) {
+						if(expandStates[parents[i].attr('id')] != 'expanded') {
+							return false;
+						}
+					}
+
+					return true;
+				};
+
+			if(expandStates) {
+				for (var elId in expandStates) {
+					el = $('#' + elId);
+					nextDepth = el.data('depth') + 1;
+					next = el.next('tr[data-depth=' + nextDepth + ']');
+
+					while(next.length > 0) {
+						if(nextDepth == $(next).data('depth')) {
+							next.hide();
+							if(expandStates[el.attr('id')] == 'expanded' && isVisible(next)) {
+								next.show();
+							}
+						}
+
+						next = next.next('tr[data-depth]').filter(checkDepth);
+					}
+
+					el.addClass(expandStates[elId]);
+				}
+
+				return true;
+			}
+
+			return false;
 		},
 		__addLimitEvent: function() {
 			var that = this;

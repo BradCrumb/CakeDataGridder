@@ -85,6 +85,9 @@ class DataGridHelper extends AppHelper {
 			'class' => 'data_grid',				//Class for datagrid
 			'element' => null					//Custom element to render, instead of default
 		),
+		'row' => array(
+			'id' => null
+		),
 		'pagination' => array(					//Default settings for pagination
 			'numbers' => array(					//Default settings for numbers
 				'tag' => 'li',
@@ -263,7 +266,7 @@ class DataGridHelper extends AppHelper {
 		}
 
 		$columns = $this->__columns;
-		
+
 		//Get the paging parameters for stuff like ordering
 		$paging = isset($this->params['paging'])? $this->params['paging']: array();
 
@@ -273,7 +276,7 @@ class DataGridHelper extends AppHelper {
 				$sortKey = isset($column['options']['sort_key']) ? $column['options']['sort_key'] : $column['value_path'];
 				$directionClass = 'sort';
 
-				foreach($paging as $pModel => $pOptions) {
+				foreach ($paging as $pOptions) {
 					if (array_key_exists('order', $pOptions) && is_array($pOptions['order']) && array_key_exists($sortKey, $pOptions['order'])) {
 						$directionClass .= ' ' . strtolower($pOptions['order'][$sortKey]);
 						break;
@@ -335,7 +338,7 @@ class DataGridHelper extends AppHelper {
 				//Check if there are children and also render these rows
 				$children = isset($row['children']) ? $row['children'] : null;
 				if (!empty($children)) {
-					$rows = array_replace_recursive($rows, $this->rows($children, true, $depth + 1));
+					$rows = array_merge($rows, $this->rows($children, true, $depth + 1));
 				}
 			}
 		}
@@ -357,6 +360,8 @@ class DataGridHelper extends AppHelper {
  * @return String The rendered row
  */
 	public function row($data, $depth = 0, array $options = array()) {
+		$options = array_replace_recursive($this->__defaults['row'], $options);
+
 		$rowData = array(
 			'columns' => array(),
 			'depth' => $depth
@@ -372,8 +377,14 @@ class DataGridHelper extends AppHelper {
 
 		$element = isset($options['element']) ? $options['element'] : $this->__pluginName . '.' . $this->__elementsDir . DS . 'row';
 
+		preg_match_all('/{(.*?)}/', $options['id'], $variables);
+		foreach ($variables[1] as $key => $valuePath) {
+			$options['id'] = str_replace($variables[0][$key], Hash::get($data, $valuePath), $options['id']);
+		}
+
 		return $this->_View->element($element, array(
-			'rowData' => $rowData
+			'rowData' => $rowData,
+			'rowId' => $options['id']
 		));
 	}
 
@@ -853,6 +864,6 @@ class DataGridHelper extends AppHelper {
 			'inline' => false
 		), $options);
 
-		return $this->Html->script($this->__pluginName . '.DataGrid', $options);
+		return $this->Html->script($this->__pluginName . '.jquery.cookie', $options) . $this->Html->script($this->__pluginName . '.DataGrid', $options);
 	}
 }
